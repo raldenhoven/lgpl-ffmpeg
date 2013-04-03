@@ -1,0 +1,1 @@
+config:x86:x86_64:generic:darwin:Apple clang version 4.1 (tags/Apple/clang-421.11.66) (based on LLVM 3.1svn):--prefix=../external --enable-shared --enable-version3 --arch=x86_64 --cc='cc -m64'

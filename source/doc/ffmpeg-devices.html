@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html>
+<!-- Created on April, 3 2013 by texi2html 1.70 -->
+<!--
+Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
+            Karl Berry  <karl@freefriends.org>
+            Olaf Bachmann <obachman@mathematik.uni-kl.de>
+            and many others.
+Maintained by: Many creative people <dev@texi2html.cvshome.org>
+Send bugs and suggestions to <users@texi2html.cvshome.org>
+
+-->
+<head>
+<title>FFmpeg documentation : : </title>
+
+<meta name="description" content=": ">
+<meta name="keywords" content="FFmpeg documentation : : ">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="texi2html 1.70">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8-strict">
+<link rel="stylesheet" type="text/css" href="default.css" />
+
+<link rel="icon" href="favicon.png" type="image/png" />
+</head>
+<body>
+<div id="container">
+
+<a name="SEC_Top"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC_Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h1 class="settitle">FFmpeg Devices Documentation
+</h1>
+
+
+
+
+<a name="SEC1"></a>
+<h1 class="chapter"> <a href="#TOC1">1. Description</a> </h1>
+
+<p>This document describes the input and output devices provided by the
+libavdevice library.
+
+</p>
+<a name="SEC2"></a>
+<h1 class="chapter"> <a href="#TOC2">2. Device Options</a> </h1>
+
+<p>The libavdevice library provides the same interface as
+libavformat. Namely, an input device is considered like a demuxer, and
+an output device like a muxer, and the interface and generic device
+options are the same provided by libavformat (see the ffmpeg-formats
+manual).
+
+</p><p>In addition each input or output device may support so-called private
+options, which are specific for that component.
+
+</p><p>Options may be set by specifying -<var>option</var> <var>value</var> in the
+FFmpeg tools, or by setting the value explicitly in the device
+<code>AVFormatContext</code> options or using the `<tt>libavutil/opt.h</tt>' API
+for programmatic use.
+
+</p>
+
+<a name="SEC3"></a>
+<h1 class="chapter"> <a href="#TOC3">3. Input Devices</a> </h1>
+
+<p>Input devices are configured elements in FFmpeg which allow to access
+the data coming from a multimedia device attached to your system.
+
+</p><p>When you configure your FFmpeg build, all the supported input devices
+are enabled by default. You can list all available ones using the
+configure option &quot;-list-indevs&quot;.
+
+</p><p>You can disable all the input devices using the configure option
+&quot;-disable-indevs&quot;, and selectively enable an input device using the
+option &quot;-enable-indev=<var>INDEV</var>&quot;, or you can disable a particular
+input device using the option &quot;-disable-indev=<var>INDEV</var>&quot;.
+
+</p><p>The option &quot;-formats&quot; of the ff* tools will display the list of
+supported input devices (amongst the demuxers).
+
+</p><p>A description of the currently available input devices follows.
+
+</p><a name="SEC4"></a>
+<h2 class="section"> <a href="#TOC4">3.1 alsa</a> </h2>
+
+<p>ALSA (Advanced Linux Sound Architecture) input device.
+
+</p><p>To enable this input device during configuration you need libasound
+installed on your system.
+
+</p><p>This device allows capturing from an ALSA device. The name of the
+device to capture has to be an ALSA card identifier.
+
+</p><p>An ALSA identifier has the syntax:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">hw:<var>CARD</var>[,<var>DEV</var>[,<var>SUBDEV</var>]]
+</pre></td></tr></table>
+<p>where the <var>DEV</var> and <var>SUBDEV</var> components are optional.
+
+</p><p>The three arguments (in order: <var>CARD</var>,<var>DEV</var>,<var>SUBDEV</var>)
+specify card number or identifier, device number and subdevice number
+(-1 means any).
+
+</p><p>To see the list of cards currently recognized by your system check the
+files `<tt>/proc/asound/cards</tt>' and `<tt>/proc/asound/devices</tt>'.
+
+</p><p>For example to capture with <code>ffmpeg</code> from an ALSA device with
+card id 0, you may run the command:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f alsa -i hw:0 alsaout.wav
+</pre></td></tr></table>
+<p>For more information see:
+<a href="http://www.alsa-project.org/alsa-doc/alsa-lib/pcm.html">http://www.alsa-project.org/alsa-doc/alsa-lib/pcm.html</a>
+
+</p><a name="SEC5"></a>
+<h2 class="section"> <a href="#TOC5">3.2 bktr</a> </h2>
+
+<p>BSD video input device.
+
+</p><a name="SEC6"></a>
+<h2 class="section"> <a href="#TOC6">3.3 dshow</a> </h2>
+
+<p>Windows DirectShow input device.
+
+</p><p>DirectShow support is enabled when FFmpeg is built with the mingw-w64 project.
+Currently only audio and video devices are supported.
+
+</p><p>Multiple devices may be opened as separate inputs, but they may also be
+opened on the same input, which should improve synchronism between them.
+
+</p><p>The input name should be in the format:
+
+</p><table><tr><td>&nbsp;</td><td><pre class="example"><var>TYPE</var>=<var>NAME</var>[:<var>TYPE</var>=<var>NAME</var>]
+</pre></td></tr></table>
+<p>where <var>TYPE</var> can be either <var>audio</var> or <var>video</var>,
+and <var>NAME</var> is the device's name.
+
+</p><a name="SEC7"></a>
+<h3 class="subsection"> <a href="#TOC7">3.3.1 Options</a> </h3>
+
+<p>If no options are specified, the device's defaults are used.
+If the device does not support the requested options, it will
+fail to open.
+
+</p><dl compact="compact">
+<dt>`<samp> video_size</samp>'</dt>
+<dd><p>Set the video size in the captured video.
+
+</p></dd>
+<dt>`<samp> framerate</samp>'</dt>
+<dd><p>Set the frame rate in the captured video.
+
+</p></dd>
+<dt>`<samp> sample_rate</samp>'</dt>
+<dd><p>Set the sample rate (in Hz) of the captured audio.
+
+</p></dd>
+<dt>`<samp> sample_size</samp>'</dt>
+<dd><p>Set the sample size (in bits) of the captured audio.
+
+</p></dd>
+<dt>`<samp> channels</samp>'</dt>
+<dd><p>Set the number of channels in the captured audio.
+
+</p></dd>
+<dt>`<samp> list_devices</samp>'</dt>
+<dd><p>If set to `<samp>true</samp>', print a list of devices and exit.
+
+</p></dd>
+<dt>`<samp> list_options</samp>'</dt>
+<dd><p>If set to `<samp>true</samp>', print a list of selected device's options
+and exit.
+
+</p></dd>
+<dt>`<samp> video_device_number</samp>'</dt>
+<dd><p>Set video device number for devices with same name (starts at 0,
+defaults to 0).
+
+</p></dd>
+<dt>`<samp> audio_device_number</samp>'</dt>
+<dd><p>Set audio device number for devices with same name (starts at 0,
+defaults to 0).
+
+</p></dd>
+<dt>`<samp> pixel_format</samp>'</dt>
+<dd><p>Select pixel format to be used by DirectShow. This may only be set when
+the video codec is not set or set to rawvideo.
+
+</p></dd>
+<dt>`<samp> audio_buffer_size</samp>'</dt>
+<dd><p>Set audio device buffer size in milliseconds (which can directly
+impact latency, depending on the device).
+Defaults to using the audio device's
+default buffer size (typically some multiple of 500ms).
+Setting this value too low can degrade performance.
+See also
+<a href="http://msdn.microsoft.com/en-us/library/windows/desktop/dd377582(v=vs.85).aspx">http://msdn.microsoft.com/en-us/library/windows/desktop/dd377582(v=vs.85).aspx</a>
+
+</p></dd>
+</dl>
+
+<a name="SEC8"></a>
+<h3 class="subsection"> <a href="#TOC8">3.3.2 Examples</a> </h3>
+
+<ul class="toc">
+<li>
+<p>Print the list of DirectShow supported devices and exit:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">$ ffmpeg -list_devices true -f dshow -i dummy
+</pre></td></tr></table></li><li>
+<p>Open video device <var>Camera</var>:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">$ ffmpeg -f dshow -i video=&quot;Camera&quot;
+</pre></td></tr></table></li><li>
+<p>Open second video device with name <var>Camera</var>:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">$ ffmpeg -f dshow -video_device_number 1 -i video=&quot;Camera&quot;
+</pre></td></tr></table></li><li>
+<p>Open video device <var>Camera</var> and audio device <var>Microphone</var>:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">$ ffmpeg -f dshow -i video=&quot;Camera&quot;:audio=&quot;Microphone&quot;
+</pre></td></tr></table></li><li>
+<p>Print the list of supported options in selected device and exit:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">$ ffmpeg -list_options true -f dshow -i video=&quot;Camera&quot;
+</pre></td></tr></table></li></ul>
+
+<a name="SEC9"></a>
+<h2 class="section"> <a href="#TOC9">3.4 dv1394</a> </h2>
+
+<p>Linux DV 1394 input device.
+
+</p><a name="SEC10"></a>
+<h2 class="section"> <a href="#TOC10">3.5 fbdev</a> </h2>
+
+<p>Linux framebuffer input device.
+
+</p><p>The Linux framebuffer is a graphic hardware-independent abstraction
+layer to show graphics on a computer monitor, typically on the
+console. It is accessed through a file device node, usually
+`<tt>/dev/fb0</tt>'.
+
+</p><p>For more detailed information read the file
+Documentation/fb/framebuffer.txt included in the Linux source tree.
+
+</p><p>To record from the framebuffer device `<tt>/dev/fb0</tt>' with
+<code>ffmpeg</code>:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f fbdev -r 10 -i /dev/fb0 out.avi
+</pre></td></tr></table>
+<p>You can take a single screenshot image with the command:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f fbdev -frames:v 1 -r 1 -i /dev/fb0 screenshot.jpeg
+</pre></td></tr></table>
+<p>See also <a href="http://linux-fbdev.sourceforge.net/">http://linux-fbdev.sourceforge.net/</a>, and fbset(1).
+
+</p><a name="SEC11"></a>
+<h2 class="section"> <a href="#TOC11">3.6 iec61883</a> </h2>
+
+<p>FireWire DV/HDV input device using libiec61883.
+
+</p><p>To enable this input device, you need libiec61883, libraw1394 and
+libavc1394 installed on your system. Use the configure option
+<code>--enable-libiec61883</code> to compile with the device enabled.
+
+</p><p>The iec61883 capture device supports capturing from a video device
+connected via IEEE1394 (FireWire), using libiec61883 and the new Linux
+FireWire stack (juju). This is the default DV/HDV input method in Linux
+Kernel 2.6.37 and later, since the old FireWire stack was removed.
+
+</p><p>Specify the FireWire port to be used as input file, or &quot;auto&quot;
+to choose the first port connected.
+
+</p><a name="SEC12"></a>
+<h3 class="subsection"> <a href="#TOC12">3.6.1 Options</a> </h3>
+
+<dl compact="compact">
+<dt>`<samp> dvtype</samp>'</dt>
+<dd><p>Override autodetection of DV/HDV. This should only be used if auto
+detection does not work, or if usage of a different device type
+should be prohibited. Treating a DV device as HDV (or vice versa) will
+not work and result in undefined behavior.
+The values `<samp>auto</samp>', `<samp>dv</samp>' and `<samp>hdv</samp>' are supported.
+
+</p></dd>
+<dt>`<samp> dvbuffer</samp>'</dt>
+<dd><p>Set maxiumum size of buffer for incoming data, in frames. For DV, this
+is an exact value. For HDV, it is not frame exact, since HDV does
+not have a fixed frame size.
+
+</p></dd>
+<dt>`<samp> dvguid</samp>'</dt>
+<dd><p>Select the capture device by specifying it's GUID. Capturing will only
+be performed from the specified device and fails if no device with the
+given GUID is found. This is useful to select the input if multiple
+devices are connected at the same time.
+Look at /sys/bus/firewire/devices to find out the GUIDs.
+
+</p></dd>
+</dl>
+
+<a name="SEC13"></a>
+<h3 class="subsection"> <a href="#TOC13">3.6.2 Examples</a> </h3>
+
+<ul class="toc">
+<li>
+<p>Grab and show the input of a FireWire DV/HDV device.
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffplay -f iec61883 -i auto
+</pre></td></tr></table></li><li>
+<p>Grab and record the input of a FireWire DV/HDV device,
+using a packet buffer of 100000 packets if the source is HDV.
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f iec61883 -i auto -hdvbuffer 100000 out.mpg
+</pre></td></tr></table></li></ul>
+
+<a name="SEC14"></a>
+<h2 class="section"> <a href="#TOC14">3.7 jack</a> </h2>
+
+<p>JACK input device.
+
+</p><p>To enable this input device during configuration you need libjack
+installed on your system.
+
+</p><p>A JACK input device creates one or more JACK writable clients, one for
+each audio channel, with name <var>client_name</var>:input_<var>N</var>, where
+<var>client_name</var> is the name provided by the application, and <var>N</var>
+is a number which identifies the channel.
+Each writable client will send the acquired data to the FFmpeg input
+device.
+
+</p><p>Once you have created one or more JACK readable clients, you need to
+connect them to one or more JACK writable clients.
+
+</p><p>To connect or disconnect JACK clients you can use the <code>jack_connect</code>
+and <code>jack_disconnect</code> programs, or do it through a graphical interface,
+for example with <code>qjackctl</code>.
+
+</p><p>To list the JACK clients and their properties you can invoke the command
+<code>jack_lsp</code>.
+
+</p><p>Follows an example which shows how to capture a JACK readable client
+with <code>ffmpeg</code>.
+</p><table><tr><td>&nbsp;</td><td><pre class="example"># Create a JACK writable client with name &quot;ffmpeg&quot;.
+$ ffmpeg -f jack -i ffmpeg -y out.wav
+
+# Start the sample jack_metro readable client.
+$ jack_metro -b 120 -d 0.2 -f 4000
+
+# List the current JACK clients.
+$ jack_lsp -c
+system:capture_1
+system:capture_2
+system:playback_1
+system:playback_2
+ffmpeg:input_1
+metro:120_bpm
+
+# Connect metro to the ffmpeg writable client.
+$ jack_connect metro:120_bpm ffmpeg:input_1
+</pre></td></tr></table>
+<p>For more information read:
+<a href="http://jackaudio.org/">http://jackaudio.org/</a>
+
+</p><a name="SEC15"></a>
+<h2 class="section"> <a href="#TOC15">3.8 lavfi</a> </h2>
+
+<p>Libavfilter input virtual device.
+
+</p><p>This input device reads data from the open output pads of a libavfilter
+filtergraph.
+
+</p><p>For each filtergraph open output, the input device will create a
+corresponding stream which is mapped to the generated output. Currently
+only video data is supported. The filtergraph is specified through the
+option `<samp>graph</samp>'.
+
+</p><a name="SEC16"></a>
+<h3 class="subsection"> <a href="#TOC16">3.8.1 Options</a> </h3>
+
+<dl compact="compact">
+<dt>`<samp> graph</samp>'</dt>
+<dd><p>Specify the filtergraph to use as input. Each video open output must be
+labelled by a unique string of the form &quot;out<var>N</var>&quot;, where <var>N</var> is a
+number starting from 0 corresponding to the mapped input stream
+generated by the device.
+The first unlabelled output is automatically assigned to the &quot;out0&quot;
+label, but all the others need to be specified explicitly.
+
+</p><p>If not specified defaults to the filename specified for the input
+device.
+
+</p></dd>
+<dt>`<samp> graph_file</samp>'</dt>
+<dd><p>Set the filename of the filtergraph to be read and sent to the other
+filters. Syntax of the filtergraph is the same as the one specified by
+the option <var>graph</var>.
+
+</p></dd>
+</dl>
+
+<a name="SEC17"></a>
+<h3 class="subsection"> <a href="#TOC17">3.8.2 Examples</a> </h3>
+
+<ul class="toc">
+<li>
+<p>Create a color video stream and play it back with <code>ffplay</code>:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffplay -f lavfi -graph &quot;color=c=pink [out0]&quot; dummy
+</pre></td></tr></table></li><li>
+<p>As the previous example, but use filename for specifying the graph
+description, and omit the &quot;out0&quot; label:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffplay -f lavfi color=c=pink
+</pre></td></tr></table></li><li>
+<p>Create three different video test filtered sources and play them:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffplay -f lavfi -graph &quot;testsrc [out0]; testsrc,hflip [out1]; testsrc,negate [out2]&quot; test3
+</pre></td></tr></table></li><li>
+<p>Read an audio stream from a file using the amovie source and play it
+back with <code>ffplay</code>:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffplay -f lavfi &quot;amovie=test.wav&quot;
+</pre></td></tr></table></li><li>
+<p>Read an audio stream and a video stream and play it back with
+<code>ffplay</code>:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffplay -f lavfi &quot;movie=test.avi[out0];amovie=test.wav[out1]&quot;
+</pre></td></tr></table></li></ul>
+
+<a name="SEC18"></a>
+<h2 class="section"> <a href="#TOC18">3.9 libdc1394</a> </h2>
+
+<p>IIDC1394 input device, based on libdc1394 and libraw1394.
+
+</p><a name="SEC19"></a>
+<h2 class="section"> <a href="#TOC19">3.10 openal</a> </h2>
+
+<p>The OpenAL input device provides audio capture on all systems with a
+working OpenAL 1.1 implementation.
+
+</p><p>To enable this input device during configuration, you need OpenAL
+headers and libraries installed on your system, and need to configure
+FFmpeg with <code>--enable-openal</code>.
+
+</p><p>OpenAL headers and libraries should be provided as part of your OpenAL
+implementation, or as an additional download (an SDK). Depending on your
+installation you may need to specify additional flags via the
+<code>--extra-cflags</code> and <code>--extra-ldflags</code> for allowing the build
+system to locate the OpenAL headers and libraries.
+
+</p><p>An incomplete list of OpenAL implementations follows:
+
+</p><dl compact="compact">
+<dt><strong> Creative</strong></dt>
+<dd><p>The official Windows implementation, providing hardware acceleration
+with supported devices and software fallback.
+See <a href="http://openal.org/">http://openal.org/</a>.
+</p></dd>
+<dt><strong> OpenAL Soft</strong></dt>
+<dd><p>Portable, open source (LGPL) software implementation. Includes
+backends for the most common sound APIs on the Windows, Linux,
+Solaris, and BSD operating systems.
+See <a href="http://kcat.strangesoft.net/openal.html">http://kcat.strangesoft.net/openal.html</a>.
+</p></dd>
+<dt><strong> Apple</strong></dt>
+<dd><p>OpenAL is part of Core Audio, the official Mac OS X Audio interface.
+See <a href="http://developer.apple.com/technologies/mac/audio-and-video.html">http://developer.apple.com/technologies/mac/audio-and-video.html</a>
+</p></dd>
+</dl>
+
+<p>This device allows to capture from an audio input device handled
+through OpenAL.
+
+</p><p>You need to specify the name of the device to capture in the provided
+filename. If the empty string is provided, the device will
+automatically select the default device. You can get the list of the
+supported devices by using the option <var>list_devices</var>.
+
+</p><a name="SEC20"></a>
+<h3 class="subsection"> <a href="#TOC20">3.10.1 Options</a> </h3>
+
+<dl compact="compact">
+<dt>`<samp> channels</samp>'</dt>
+<dd><p>Set the number of channels in the captured audio. Only the values
+`<samp>1</samp>' (monaural) and `<samp>2</samp>' (stereo) are currently supported.
+Defaults to `<samp>2</samp>'.
+
+</p></dd>
+<dt>`<samp> sample_size</samp>'</dt>
+<dd><p>Set the sample size (in bits) of the captured audio. Only the values
+`<samp>8</samp>' and `<samp>16</samp>' are currently supported. Defaults to
+`<samp>16</samp>'.
+
+</p></dd>
+<dt>`<samp> sample_rate</samp>'</dt>
+<dd><p>Set the sample rate (in Hz) of the captured audio.
+Defaults to `<samp>44.1k</samp>'.
+
+</p></dd>
+<dt>`<samp> list_devices</samp>'</dt>
+<dd><p>If set to `<samp>true</samp>', print a list of devices and exit.
+Defaults to `<samp>false</samp>'.
+
+</p></dd>
+</dl>
+
+<a name="SEC21"></a>
+<h3 class="subsection"> <a href="#TOC21">3.10.2 Examples</a> </h3>
+
+<p>Print the list of OpenAL supported devices and exit:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">$ ffmpeg -list_devices true -f openal -i dummy out.ogg
+</pre></td></tr></table>
+<p>Capture from the OpenAL device `<tt>DR-BT101 via PulseAudio</tt>':
+</p><table><tr><td>&nbsp;</td><td><pre class="example">$ ffmpeg -f openal -i 'DR-BT101 via PulseAudio' out.ogg
+</pre></td></tr></table>
+<p>Capture from the default device (note the empty string &quot; as filename):
+</p><table><tr><td>&nbsp;</td><td><pre class="example">$ ffmpeg -f openal -i '' out.ogg
+</pre></td></tr></table>
+<p>Capture from two devices simultaneously, writing to two different files,
+within the same <code>ffmpeg</code> command:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">$ ffmpeg -f openal -i 'DR-BT101 via PulseAudio' out1.ogg -f openal -i 'ALSA Default' out2.ogg
+</pre></td></tr></table><p>Note: not all OpenAL implementations support multiple simultaneous capture -
+try the latest OpenAL Soft if the above does not work.
+
+</p><a name="SEC22"></a>
+<h2 class="section"> <a href="#TOC22">3.11 oss</a> </h2>
+
+<p>Open Sound System input device.
+
+</p><p>The filename to provide to the input device is the device node
+representing the OSS input device, and is usually set to
+`<tt>/dev/dsp</tt>'.
+
+</p><p>For example to grab from `<tt>/dev/dsp</tt>' using <code>ffmpeg</code> use the
+command:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f oss -i /dev/dsp /tmp/oss.wav
+</pre></td></tr></table>
+<p>For more information about OSS see:
+<a href="http://manuals.opensound.com/usersguide/dsp.html">http://manuals.opensound.com/usersguide/dsp.html</a>
+
+</p><a name="SEC23"></a>
+<h2 class="section"> <a href="#TOC23">3.12 pulse</a> </h2>
+
+<p>pulseaudio input device.
+
+</p><p>To enable this input device during configuration you need libpulse-simple
+installed in your system.
+
+</p><p>The filename to provide to the input device is a source device or the
+string &quot;default&quot;
+
+</p><p>To list the pulse source devices and their properties you can invoke
+the command <code>pactl list sources</code>.
+
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f pulse -i default /tmp/pulse.wav
+</pre></td></tr></table>
+<a name="SEC24"></a>
+<h3 class="subsection"> <a href="#TOC24">3.12.1 <var>server</var> AVOption</a> </h3>
+
+<p>The syntax is:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">-server <var>server name</var>
+</pre></td></tr></table>
+<p>Connects to a specific server.
+
+</p><a name="SEC25"></a>
+<h3 class="subsection"> <a href="#TOC25">3.12.2 <var>name</var> AVOption</a> </h3>
+
+<p>The syntax is:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">-name <var>application name</var>
+</pre></td></tr></table>
+<p>Specify the application name pulse will use when showing active clients,
+by default it is the LIBAVFORMAT_IDENT string
+
+</p><a name="SEC26"></a>
+<h3 class="subsection"> <a href="#TOC26">3.12.3 <var>stream_name</var> AVOption</a> </h3>
+
+<p>The syntax is:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">-stream_name <var>stream name</var>
+</pre></td></tr></table>
+<p>Specify the stream name pulse will use when showing active streams,
+by default it is &quot;record&quot;
+
+</p><a name="SEC27"></a>
+<h3 class="subsection"> <a href="#TOC27">3.12.4 <var>sample_rate</var> AVOption</a> </h3>
+
+<p>The syntax is:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">-sample_rate <var>samplerate</var>
+</pre></td></tr></table>
+<p>Specify the samplerate in Hz, by default 48kHz is used.
+
+</p><a name="SEC28"></a>
+<h3 class="subsection"> <a href="#TOC28">3.12.5 <var>channels</var> AVOption</a> </h3>
+
+<p>The syntax is:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">-channels <var>N</var>
+</pre></td></tr></table>
+<p>Specify the channels in use, by default 2 (stereo) is set.
+
+</p><a name="SEC29"></a>
+<h3 class="subsection"> <a href="#TOC29">3.12.6 <var>frame_size</var> AVOption</a> </h3>
+
+<p>The syntax is:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">-frame_size <var>bytes</var>
+</pre></td></tr></table>
+<p>Specify the number of byte per frame, by default it is set to 1024.
+
+</p><a name="SEC30"></a>
+<h3 class="subsection"> <a href="#TOC30">3.12.7 <var>fragment_size</var> AVOption</a> </h3>
+
+<p>The syntax is:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">-fragment_size <var>bytes</var>
+</pre></td></tr></table>
+<p>Specify the minimal buffering fragment in pulseaudio, it will affect the
+audio latency. By default it is unset.
+
+</p><a name="SEC31"></a>
+<h2 class="section"> <a href="#TOC31">3.13 sndio</a> </h2>
+
+<p>sndio input device.
+
+</p><p>To enable this input device during configuration you need libsndio
+installed on your system.
+
+</p><p>The filename to provide to the input device is the device node
+representing the sndio input device, and is usually set to
+`<tt>/dev/audio0</tt>'.
+
+</p><p>For example to grab from `<tt>/dev/audio0</tt>' using <code>ffmpeg</code> use the
+command:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f sndio -i /dev/audio0 /tmp/oss.wav
+</pre></td></tr></table>
+<a name="SEC32"></a>
+<h2 class="section"> <a href="#TOC32">3.14 video4linux2, v4l2</a> </h2>
+
+<p>Video4Linux2 input video device.
+
+</p><p>&quot;v4l2&quot; can be used as alias for &quot;video4linux2&quot;.
+
+</p><p>If FFmpeg is built with v4l-utils support (by using the
+<code>--enable-libv4l2</code> configure option), the device will always rely
+on libv4l2.
+
+</p><p>The name of the device to grab is a file device node, usually Linux
+systems tend to automatically create such nodes when the device
+(e.g. an USB webcam) is plugged into the system, and has a name of the
+kind `<tt>/dev/video<var>N</var></tt>', where <var>N</var> is a number associated to
+the device.
+
+</p><p>Video4Linux2 devices usually support a limited set of
+<var>width</var>x<var>height</var> sizes and frame rates. You can check which are
+supported using <code>-list_formats all</code> for Video4Linux2 devices.
+Some devices, like TV cards, support one or more standards. It is possible
+to list all the supported standards using <code>-list_standards all</code>.
+
+</p><p>The time base for the timestamps is 1 microsecond. Depending on the kernel
+version and configuration, the timestamps may be derived from the real time
+clock (origin at the Unix Epoch) or the monotonic clock (origin usually at
+boot time, unaffected by NTP or manual changes to the clock). The
+`<samp>-timestamps abs</samp>' or `<samp>-ts abs</samp>' option can be used to force
+conversion into the real time clock.
+
+</p><p>Some usage examples of the video4linux2 device with <code>ffmpeg</code>
+and <code>ffplay</code>:
+</p><ul class="toc">
+<li>
+<p>Grab and show the input of a video4linux2 device:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffplay -f video4linux2 -framerate 30 -video_size hd720 /dev/video0
+</pre></td></tr></table></li><li>
+<p>Grab and record the input of a video4linux2 device, leave the
+frame rate and size as previously set:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f video4linux2 -input_format mjpeg -i /dev/video0 out.mpeg
+</pre></td></tr></table></li></ul>
+
+<p>For more information about Video4Linux, check <a href="http://linuxtv.org/">http://linuxtv.org/</a>.
+
+</p><a name="SEC33"></a>
+<h3 class="subsection"> <a href="#TOC33">3.14.1 Options</a> </h3>
+
+<dl compact="compact">
+<dt>`<samp> standard</samp>'</dt>
+<dd><p>Set the standard. Must be the name of a supported standard. To get a
+list of the supported standards, use the `<samp>list_standards</samp>'
+option.
+
+</p></dd>
+<dt>`<samp> channel</samp>'</dt>
+<dd><p>Set the input channel number. Default to -1, which means using the
+previously selected channel.
+
+</p></dd>
+<dt>`<samp> video_size</samp>'</dt>
+<dd><p>Set the video frame size. The argument must be a string in the form
+<var>WIDTH</var>x<var>HEIGHT</var> or a valid size abbreviation.
+
+</p></dd>
+<dt>`<samp> pixel_format</samp>'</dt>
+<dd><p>Select the pixel format (only valid for raw video input).
+
+</p></dd>
+<dt>`<samp> input_format</samp>'</dt>
+<dd><p>Set the preferred pixel format (for raw video) or a codec name.
+This option allows to select the input format, when several are
+available.
+
+</p></dd>
+<dt>`<samp> framerate</samp>'</dt>
+<dd><p>Set the preferred video frame rate.
+
+</p></dd>
+<dt>`<samp> list_formats</samp>'</dt>
+<dd><p>List available formats (supported pixel formats, codecs, and frame
+sizes) and exit.
+
+</p><p>Available values are:
+</p><dl compact="compact">
+<dt>`<samp> all</samp>'</dt>
+<dd><p>Show all available (compressed and non-compressed) formats.
+
+</p></dd>
+<dt>`<samp> raw</samp>'</dt>
+<dd><p>Show only raw video (non-compressed) formats.
+
+</p></dd>
+<dt>`<samp> compressed</samp>'</dt>
+<dd><p>Show only compressed formats.
+</p></dd>
+</dl>
+
+</dd>
+<dt>`<samp> list_standards</samp>'</dt>
+<dd><p>List supported standards and exit.
+
+</p><p>Available values are:
+</p><dl compact="compact">
+<dt>`<samp> all</samp>'</dt>
+<dd><p>Show all supported standards.
+</p></dd>
+</dl>
+
+</dd>
+<dt>`<samp> timestamps, ts</samp>'</dt>
+<dd><p>Set type of timestamps for grabbed frames.
+
+</p><p>Available values are:
+</p><dl compact="compact">
+<dt>`<samp> default</samp>'</dt>
+<dd><p>Use timestamps from the kernel.
+
+</p></dd>
+<dt>`<samp> abs</samp>'</dt>
+<dd><p>Use absolute timestamps (wall clock).
+
+</p></dd>
+<dt>`<samp> mono2abs</samp>'</dt>
+<dd><p>Force conversion from monotonic to absolute timestamps.
+</p></dd>
+</dl>
+
+<p>Default value is <code>default</code>.
+</p></dd>
+</dl>
+
+<a name="SEC34"></a>
+<h2 class="section"> <a href="#TOC34">3.15 vfwcap</a> </h2>
+
+<p>VfW (Video for Windows) capture input device.
+
+</p><p>The filename passed as input is the capture driver number, ranging from
+0 to 9. You may use &quot;list&quot; as filename to print a list of drivers. Any
+other filename will be interpreted as device number 0.
+
+</p><a name="SEC35"></a>
+<h2 class="section"> <a href="#TOC35">3.16 x11grab</a> </h2>
+
+<p>X11 video input device.
+
+</p><p>This device allows to capture a region of an X11 display.
+
+</p><p>The filename passed as input has the syntax:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">[<var>hostname</var>]:<var>display_number</var>.<var>screen_number</var>[+<var>x_offset</var>,<var>y_offset</var>]
+</pre></td></tr></table>
+<p><var>hostname</var>:<var>display_number</var>.<var>screen_number</var> specifies the
+X11 display name of the screen to grab from. <var>hostname</var> can be
+omitted, and defaults to &quot;localhost&quot;. The environment variable
+<code>DISPLAY</code> contains the default display name.
+
+</p><p><var>x_offset</var> and <var>y_offset</var> specify the offsets of the grabbed
+area with respect to the top-left border of the X11 screen. They
+default to 0.
+
+</p><p>Check the X11 documentation (e.g. man X) for more detailed information.
+
+</p><p>Use the <code>dpyinfo</code> program for getting basic information about the
+properties of your X11 display (e.g. grep for &quot;name&quot; or &quot;dimensions&quot;).
+
+</p><p>For example to grab from `<tt>:0.0</tt>' using <code>ffmpeg</code>:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f x11grab -r 25 -s cif -i :0.0 out.mpg
+</pre></td></tr></table>
+<p>Grab at position <code>10,20</code>:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f x11grab -r 25 -s cif -i :0.0+10,20 out.mpg
+</pre></td></tr></table>
+<a name="SEC36"></a>
+<h3 class="subsection"> <a href="#TOC36">3.16.1 Options</a> </h3>
+
+<dl compact="compact">
+<dt>`<samp> draw_mouse</samp>'</dt>
+<dd><p>Specify whether to draw the mouse pointer. A value of <code>0</code> specify
+not to draw the pointer. Default value is <code>1</code>.
+
+</p></dd>
+<dt>`<samp> follow_mouse</samp>'</dt>
+<dd><p>Make the grabbed area follow the mouse. The argument can be
+<code>centered</code> or a number of pixels <var>PIXELS</var>.
+
+</p><p>When it is specified with &quot;centered&quot;, the grabbing region follows the mouse
+pointer and keeps the pointer at the center of region; otherwise, the region
+follows only when the mouse pointer reaches within <var>PIXELS</var> (greater than
+zero) to the edge of region.
+
+</p><p>For example:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f x11grab -follow_mouse centered -r 25 -s cif -i :0.0 out.mpg
+</pre></td></tr></table>
+<p>To follow only when the mouse pointer reaches within 100 pixels to edge:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f x11grab -follow_mouse 100 -r 25 -s cif -i :0.0 out.mpg
+</pre></td></tr></table>
+</dd>
+<dt>`<samp> framerate</samp>'</dt>
+<dd><p>Set the grabbing frame rate. Default value is <code>ntsc</code>,
+corresponding to a frame rate of <code>30000/1001</code>.
+
+</p></dd>
+<dt>`<samp> show_region</samp>'</dt>
+<dd><p>Show grabbed region on screen.
+
+</p><p>If <var>show_region</var> is specified with <code>1</code>, then the grabbing
+region will be indicated on screen. With this option, it is easy to
+know what is being grabbed if only a portion of the screen is grabbed.
+
+</p><p>For example:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f x11grab -show_region 1 -r 25 -s cif -i :0.0+10,20 out.mpg
+</pre></td></tr></table>
+<p>With <var>follow_mouse</var>:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -f x11grab -follow_mouse centered -show_region 1 -r 25 -s cif -i :0.0 out.mpg
+</pre></td></tr></table>
+</dd>
+<dt>`<samp> video_size</samp>'</dt>
+<dd><p>Set the video frame size. Default value is <code>vga</code>.
+</p></dd>
+</dl>
+
+
+<a name="SEC37"></a>
+<h1 class="chapter"> <a href="#TOC37">4. Output Devices</a> </h1>
+
+<p>Output devices are configured elements in FFmpeg which allow to write
+multimedia data to an output device attached to your system.
+
+</p><p>When you configure your FFmpeg build, all the supported output devices
+are enabled by default. You can list all available ones using the
+configure option &quot;-list-outdevs&quot;.
+
+</p><p>You can disable all the output devices using the configure option
+&quot;-disable-outdevs&quot;, and selectively enable an output device using the
+option &quot;-enable-outdev=<var>OUTDEV</var>&quot;, or you can disable a particular
+input device using the option &quot;-disable-outdev=<var>OUTDEV</var>&quot;.
+
+</p><p>The option &quot;-formats&quot; of the ff* tools will display the list of
+enabled output devices (amongst the muxers).
+
+</p><p>A description of the currently available output devices follows.
+
+</p><a name="SEC38"></a>
+<h2 class="section"> <a href="#TOC38">4.1 alsa</a> </h2>
+
+<p>ALSA (Advanced Linux Sound Architecture) output device.
+
+</p><a name="SEC39"></a>
+<h2 class="section"> <a href="#TOC39">4.2 caca</a> </h2>
+
+<p>CACA output device.
+
+</p><p>This output devices allows to show a video stream in CACA window.
+Only one CACA window is allowed per application, so you can
+have only one instance of this output device in an application.
+
+</p><p>To enable this output device you need to configure FFmpeg with
+<code>--enable-libcaca</code>.
+libcaca is a graphics library that outputs text instead of pixels.
+
+</p><p>For more information about libcaca, check:
+<a href="http://caca.zoy.org/wiki/libcaca">http://caca.zoy.org/wiki/libcaca</a>
+
+</p><a name="SEC40"></a>
+<h3 class="subsection"> <a href="#TOC40">4.2.1 Options</a> </h3>
+
+<dl compact="compact">
+<dt>`<samp> window_title</samp>'</dt>
+<dd><p>Set the CACA window title, if not specified default to the filename
+specified for the output device.
+
+</p></dd>
+<dt>`<samp> window_size</samp>'</dt>
+<dd><p>Set the CACA window size, can be a string of the form
+<var>width</var>x<var>height</var> or a video size abbreviation.
+If not specified it defaults to the size of the input video.
+
+</p></dd>
+<dt>`<samp> driver</samp>'</dt>
+<dd><p>Set display driver.
+
+</p></dd>
+<dt>`<samp> algorithm</samp>'</dt>
+<dd><p>Set dithering algorithm. Dithering is necessary
+because the picture being rendered has usually far more colours than
+the available palette.
+The accepted values are listed with <code>-list_dither algorithms</code>.
+
+</p></dd>
+<dt>`<samp> antialias</samp>'</dt>
+<dd><p>Set antialias method. Antialiasing smoothens the rendered
+image and avoids the commonly seen staircase effect.
+The accepted values are listed with <code>-list_dither antialiases</code>.
+
+</p></dd>
+<dt>`<samp> charset</samp>'</dt>
+<dd><p>Set which characters are going to be used when rendering text.
+The accepted values are listed with <code>-list_dither charsets</code>.
+
+</p></dd>
+<dt>`<samp> color</samp>'</dt>
+<dd><p>Set color to be used when rendering text.
+The accepted values are listed with <code>-list_dither colors</code>.
+
+</p></dd>
+<dt>`<samp> list_drivers</samp>'</dt>
+<dd><p>If set to `<samp>true</samp>', print a list of available drivers and exit.
+
+</p></dd>
+<dt>`<samp> list_dither</samp>'</dt>
+<dd><p>List available dither options related to the argument.
+The argument must be one of <code>algorithms</code>, <code>antialiases</code>,
+<code>charsets</code>, <code>colors</code>.
+</p></dd>
+</dl>
+
+<a name="SEC41"></a>
+<h3 class="subsection"> <a href="#TOC41">4.2.2 Examples</a> </h3>
+
+<ul class="toc">
+<li>
+<p>The following command shows the <code>ffmpeg</code> output is an
+CACA window, forcing its size to 80x25:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -i INPUT -vcodec rawvideo -pix_fmt rgb24 -window_size 80x25 -f caca -
+</pre></td></tr></table></li><li>
+<p>Show the list of available drivers and exit:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -i INPUT -pix_fmt rgb24 -f caca -list_drivers true -
+</pre></td></tr></table></li><li>
+<p>Show the list of available dither colors and exit:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -i INPUT -pix_fmt rgb24 -f caca -list_dither colors -
+</pre></td></tr></table></li></ul>
+
+<a name="SEC42"></a>
+<h2 class="section"> <a href="#TOC42">4.3 oss</a> </h2>
+
+<p>OSS (Open Sound System) output device.
+
+</p><a name="SEC43"></a>
+<h2 class="section"> <a href="#TOC43">4.4 sdl</a> </h2>
+
+<p>SDL (Simple DirectMedia Layer) output device.
+
+</p><p>This output devices allows to show a video stream in an SDL
+window. Only one SDL window is allowed per application, so you can
+have only one instance of this output device in an application.
+
+</p><p>To enable this output device you need libsdl installed on your system
+when configuring your build.
+
+</p><p>For more information about SDL, check:
+<a href="http://www.libsdl.org/">http://www.libsdl.org/</a>
+
+</p><a name="SEC44"></a>
+<h3 class="subsection"> <a href="#TOC44">4.4.1 Options</a> </h3>
+
+<dl compact="compact">
+<dt>`<samp> window_title</samp>'</dt>
+<dd><p>Set the SDL window title, if not specified default to the filename
+specified for the output device.
+
+</p></dd>
+<dt>`<samp> icon_title</samp>'</dt>
+<dd><p>Set the name of the iconified SDL window, if not specified it is set
+to the same value of <var>window_title</var>.
+
+</p></dd>
+<dt>`<samp> window_size</samp>'</dt>
+<dd><p>Set the SDL window size, can be a string of the form
+<var>width</var>x<var>height</var> or a video size abbreviation.
+If not specified it defaults to the size of the input video,
+downscaled according to the aspect ratio.
+</p></dd>
+</dl>
+
+<a name="SEC45"></a>
+<h3 class="subsection"> <a href="#TOC45">4.4.2 Examples</a> </h3>
+
+<p>The following command shows the <code>ffmpeg</code> output is an
+SDL window, forcing its size to the qcif format:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">ffmpeg -i INPUT -vcodec rawvideo -pix_fmt yuv420p -window_size qcif -f sdl &quot;SDL output&quot;
+</pre></td></tr></table>
+<a name="SEC46"></a>
+<h2 class="section"> <a href="#TOC46">4.5 sndio</a> </h2>
+
+<p>sndio audio output device.
+
+</p>
+<a name="SEC47"></a>
+<h1 class="chapter"> <a href="#TOC47">5. See Also</a> </h1>
+
+<p><a href="ffmpeg.html,ffmpeg">ffmpeg.html,ffmpeg</a>, <a href="ffplay.html,ffplay">ffplay.html,ffplay</a>, <a href="ffprobe.html,ffprobe">ffprobe.html,ffprobe</a>, <a href="ffserver.html,ffserver">ffserver.html,ffserver</a>,
+<a href="libavdevice.html,libavdevice">libavdevice.html,libavdevice</a>
+
+</p>
+
+<a name="SEC48"></a>
+<h1 class="chapter"> <a href="#TOC48">6. Authors</a> </h1>
+
+<p>The FFmpeg developers.
+
+</p><p>For details about the authorship, see the Git history of the project
+(git://source.ffmpeg.org/ffmpeg), e.g. by typing the command
+<code>git log</code> in the FFmpeg source directory, or browsing the
+online repository at <a href="http://source.ffmpeg.org">http://source.ffmpeg.org</a>.
+
+</p><p>Maintainers for the specific components are listed in the file
+`<tt>MAINTAINERS</tt>' in the source code tree.
+
+</p>
+<a name="SEC_Contents"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC_Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h1>Table of Contents</h1>
+<div class="contents">
+
+<ul class="toc">
+  <li><a name="TOC1" href="#SEC1">1. Description</a></li>
+  <li><a name="TOC2" href="#SEC2">2. Device Options</a></li>
+  <li><a name="TOC3" href="#SEC3">3. Input Devices</a>
+  <ul class="toc">
+    <li><a name="TOC4" href="#SEC4">3.1 alsa</a></li>
+    <li><a name="TOC5" href="#SEC5">3.2 bktr</a></li>
+    <li><a name="TOC6" href="#SEC6">3.3 dshow</a>
+    <ul class="toc">
+      <li><a name="TOC7" href="#SEC7">3.3.1 Options</a></li>
+      <li><a name="TOC8" href="#SEC8">3.3.2 Examples</a></li>
+    </ul></li>
+    <li><a name="TOC9" href="#SEC9">3.4 dv1394</a></li>
+    <li><a name="TOC10" href="#SEC10">3.5 fbdev</a></li>
+    <li><a name="TOC11" href="#SEC11">3.6 iec61883</a>
+    <ul class="toc">
+      <li><a name="TOC12" href="#SEC12">3.6.1 Options</a></li>
+      <li><a name="TOC13" href="#SEC13">3.6.2 Examples</a></li>
+    </ul></li>
+    <li><a name="TOC14" href="#SEC14">3.7 jack</a></li>
+    <li><a name="TOC15" href="#SEC15">3.8 lavfi</a>
+    <ul class="toc">
+      <li><a name="TOC16" href="#SEC16">3.8.1 Options</a></li>
+      <li><a name="TOC17" href="#SEC17">3.8.2 Examples</a></li>
+    </ul></li>
+    <li><a name="TOC18" href="#SEC18">3.9 libdc1394</a></li>
+    <li><a name="TOC19" href="#SEC19">3.10 openal</a>
+    <ul class="toc">
+      <li><a name="TOC20" href="#SEC20">3.10.1 Options</a></li>
+      <li><a name="TOC21" href="#SEC21">3.10.2 Examples</a></li>
+    </ul></li>
+    <li><a name="TOC22" href="#SEC22">3.11 oss</a></li>
+    <li><a name="TOC23" href="#SEC23">3.12 pulse</a>
+    <ul class="toc">
+      <li><a name="TOC24" href="#SEC24">3.12.1 <var>server</var> AVOption</a></li>
+      <li><a name="TOC25" href="#SEC25">3.12.2 <var>name</var> AVOption</a></li>
+      <li><a name="TOC26" href="#SEC26">3.12.3 <var>stream_name</var> AVOption</a></li>
+      <li><a name="TOC27" href="#SEC27">3.12.4 <var>sample_rate</var> AVOption</a></li>
+      <li><a name="TOC28" href="#SEC28">3.12.5 <var>channels</var> AVOption</a></li>
+      <li><a name="TOC29" href="#SEC29">3.12.6 <var>frame_size</var> AVOption</a></li>
+      <li><a name="TOC30" href="#SEC30">3.12.7 <var>fragment_size</var> AVOption</a></li>
+    </ul></li>
+    <li><a name="TOC31" href="#SEC31">3.13 sndio</a></li>
+    <li><a name="TOC32" href="#SEC32">3.14 video4linux2, v4l2</a>
+    <ul class="toc">
+      <li><a name="TOC33" href="#SEC33">3.14.1 Options</a></li>
+    </ul></li>
+    <li><a name="TOC34" href="#SEC34">3.15 vfwcap</a></li>
+    <li><a name="TOC35" href="#SEC35">3.16 x11grab</a>
+    <ul class="toc">
+      <li><a name="TOC36" href="#SEC36">3.16.1 Options</a></li>
+    </ul>
+</li>
+  </ul></li>
+  <li><a name="TOC37" href="#SEC37">4. Output Devices</a>
+  <ul class="toc">
+    <li><a name="TOC38" href="#SEC38">4.1 alsa</a></li>
+    <li><a name="TOC39" href="#SEC39">4.2 caca</a>
+    <ul class="toc">
+      <li><a name="TOC40" href="#SEC40">4.2.1 Options</a></li>
+      <li><a name="TOC41" href="#SEC41">4.2.2 Examples</a></li>
+    </ul></li>
+    <li><a name="TOC42" href="#SEC42">4.3 oss</a></li>
+    <li><a name="TOC43" href="#SEC43">4.4 sdl</a>
+    <ul class="toc">
+      <li><a name="TOC44" href="#SEC44">4.4.1 Options</a></li>
+      <li><a name="TOC45" href="#SEC45">4.4.2 Examples</a></li>
+    </ul></li>
+    <li><a name="TOC46" href="#SEC46">4.5 sndio</a></li>
+  </ul></li>
+  <li><a name="TOC47" href="#SEC47">5. See Also</a></li>
+  <li><a name="TOC48" href="#SEC48">6. Authors</a></li>
+</ul>
+</div>
+
+<a name="SEC_About"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC_Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h1>About This Document</h1>
+<p>
+  This document was generated by <em>Robin Aldenhoven</em> on <em>April, 3 2013</em> using <a href="http://texi2html.cvshome.org/"><em>texi2html 1.70</em></a>.
+</p>
+<p>
+  The buttons in the navigation panels have the following meaning:
+</p>
+<table border="1">
+  <tr>
+    <th> Button </th>
+    <th> Name </th>
+    <th> Go to </th>
+    <th> From 1.2.3 go to</th>
+  </tr>
+  <tr>
+    <td align="center"> [ &lt; ] </td>
+    <td align="center">Back</td>
+    <td>previous section in reading order</td>
+    <td>1.2.2</td>
+  </tr>
+  <tr>
+    <td align="center"> [ &gt; ] </td>
+    <td align="center">Forward</td>
+    <td>next section in reading order</td>
+    <td>1.2.4</td>
+  </tr>
+  <tr>
+    <td align="center"> [ &lt;&lt; ] </td>
+    <td align="center">FastBack</td>
+    <td>beginning of this chapter or previous chapter</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td align="center"> [ Up ] </td>
+    <td align="center">Up</td>
+    <td>up section</td>
+    <td>1.2</td>
+  </tr>
+  <tr>
+    <td align="center"> [ &gt;&gt; ] </td>
+    <td align="center">FastForward</td>
+    <td>next chapter</td>
+    <td>2</td>
+  </tr>
+  <tr>
+    <td align="center"> [Top] </td>
+    <td align="center">Top</td>
+    <td>cover (top) of document</td>
+    <td> &nbsp; </td>
+  </tr>
+  <tr>
+    <td align="center"> [Contents] </td>
+    <td align="center">Contents</td>
+    <td>table of contents</td>
+    <td> &nbsp; </td>
+  </tr>
+  <tr>
+    <td align="center"> [Index] </td>
+    <td align="center">Index</td>
+    <td>index</td>
+    <td> &nbsp; </td>
+  </tr>
+  <tr>
+    <td align="center"> [ ? ] </td>
+    <td align="center">About</td>
+    <td>about (help)</td>
+    <td> &nbsp; </td>
+  </tr>
+</table>
+
+<p>
+  where the <strong> Example </strong> assumes that the current position is at <strong> Subsubsection One-Two-Three </strong> of a document of the following structure:
+</p>
+
+<ul>
+  <li> 1. Section One
+    <ul>
+      <li>1.1 Subsection One-One
+        <ul>
+          <li>...</li>
+        </ul>
+      </li>
+      <li>1.2 Subsection One-Two
+        <ul>
+          <li>1.2.1 Subsubsection One-Two-One</li>
+          <li>1.2.2 Subsubsection One-Two-Two</li>
+          <li>1.2.3 Subsubsection One-Two-Three &nbsp; &nbsp;
+            <strong>&lt;== Current Position </strong></li>
+          <li>1.2.4 Subsubsection One-Two-Four</li>
+        </ul>
+      </li>
+      <li>1.3 Subsection One-Three
+        <ul>
+          <li>...</li>
+        </ul>
+      </li>
+      <li>1.4 Subsection One-Four</li>
+    </ul>
+  </li>
+</ul>
+
+
+<footer class="footer pagination-right">
+<span class="label label-info">This document was generated by <em>Robin Aldenhoven</em> on <em>April, 3 2013</em> using <a href="http://texi2html.cvshome.org/"><em>texi2html 1.70</em></a>.</span></footer></div>

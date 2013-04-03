@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html>
+<!-- Created on April, 3 2013 by texi2html 1.70 -->
+<!--
+Written by: Lionel Cons <Lionel.Cons@cern.ch> (original author)
+            Karl Berry  <karl@freefriends.org>
+            Olaf Bachmann <obachman@mathematik.uni-kl.de>
+            and many others.
+Maintained by: Many creative people <dev@texi2html.cvshome.org>
+Send bugs and suggestions to <users@texi2html.cvshome.org>
+
+-->
+<head>
+<title>FFmpeg documentation : : </title>
+
+<meta name="description" content=": ">
+<meta name="keywords" content="FFmpeg documentation : : ">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="texi2html 1.70">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8-strict">
+<link rel="stylesheet" type="text/css" href="default.css" />
+
+<link rel="icon" href="favicon.png" type="image/png" />
+</head>
+<body>
+<div id="container">
+
+<a name="SEC_Top"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC_Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h1 class="settitle">FFmpeg Utilities Documentation
+</h1>
+
+
+
+
+<a name="SEC1"></a>
+<h1 class="chapter"> <a href="#TOC1">1. Description</a> </h1>
+
+<p>This document describes some generic features and utilities provided
+by the libavutil library.
+
+</p>
+
+<a name="SEC2"></a>
+<h1 class="chapter"> <a href="#TOC2">2. Syntax</a> </h1>
+
+<p>This section documents the syntax and formats employed by the FFmpeg
+libraries and tools.
+
+</p><p><a name="ANC1"></a>
+</p><a name="SEC3"></a>
+<h2 class="section"> <a href="#TOC3">2.1 Quoting and escaping</a> </h2>
+
+<p>FFmpeg adopts the following quoting and escaping mechanism, unless
+explicitly specified. The following rules are applied:
+
+</p><ul class="toc">
+<li>
+<p><code>'</code> and <code>\</code> are special characters (respectively used for
+quoting and escaping). In addition to them, there might be other
+special characters depending on the specific syntax where the escaping
+and quoting are employed.
+
+</p></li><li>
+<p>A special character is escaped by prefixing it with a '\'.
+
+</p></li><li>
+<p>All characters enclosed between &quot; are included literally in the
+parsed string. The quote character <code>'</code> itself cannot be quoted,
+so you may need to close the quote and escape it.
+
+</p></li><li>
+<p>Leading and trailing whitespaces, unless escaped or quoted, are
+removed from the parsed string.
+</p></li></ul>
+
+<p>Note that you may need to add a second level of escaping when using
+the command line or a script, which depends on the syntax of the
+adopted shell language.
+
+</p><p>The function <code>av_get_token</code> defined in
+`<tt>libavutil/avstring.h</tt>' can be used to parse a token quoted or
+escaped according to the rules defined above.
+
+</p><p>The tool `<tt>tools/ffescape</tt>' in the FFmpeg source tree can be used
+to automatically quote or escape a string in a script.
+
+</p><a name="SEC4"></a>
+<h3 class="subsection"> <a href="#TOC4">2.1.1 Examples</a> </h3>
+
+<ul class="toc">
+<li>
+<p>Escape the string <code>Crime d'Amour</code> containing the <code>'</code> special
+character:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">Crime d\'Amour
+</pre></td></tr></table></li><li>
+<p>The string above contains a quote, so the <code>'</code> needs to be escaped
+when quoting it:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">'Crime d'\''Amour'
+</pre></td></tr></table></li><li>
+<p>Include leading or trailing whitespaces using quoting:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">'  this string starts and ends with whitespaces  '
+</pre></td></tr></table></li><li>
+<p>Escaping and quoting can be mixed together:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">' The string '\'string\'' is a string '
+</pre></td></tr></table></li><li>
+<p>To include a literal <code>\</code> you can use either escaping or quoting:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">'c:\foo' can be written as c:\\foo
+</pre></td></tr></table></li></ul>
+
+<p><a name="ANC2"></a>
+</p><a name="SEC5"></a>
+<h2 class="section"> <a href="#TOC5">2.2 Date</a> </h2>
+
+<p>The accepted syntax is:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">[(YYYY-MM-DD|YYYYMMDD)[T|t| ]]((HH:MM:SS[.m...]]])|(HHMMSS[.m...]]]))[Z]
+now
+</pre></td></tr></table>
+<p>If the value is &quot;now&quot; it takes the current time.
+
+</p><p>Time is local time unless Z is appended, in which case it is
+interpreted as UTC.
+If the year-month-day part is not specified it takes the current
+year-month-day.
+
+</p><p><a name="ANC3"></a>
+</p><a name="SEC6"></a>
+<h2 class="section"> <a href="#TOC6">2.3 Time duration</a> </h2>
+
+<p>The accepted syntax is:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">[-][HH:]MM:SS[.m...]
+[-]S+[.m...]
+</pre></td></tr></table>
+<p><var>HH</var> expresses the number of hours, <var>MM</var> the number a of minutes
+and <var>SS</var> the number of seconds.
+
+</p><p><a name="ANC4"></a>
+</p><a name="SEC7"></a>
+<h2 class="section"> <a href="#TOC7">2.4 Video size</a> </h2>
+<p>Specify the size of the sourced video, it may be a string of the form
+<var>width</var>x<var>height</var>, or the name of a size abbreviation.
+
+</p><p>The following abbreviations are recognized:
+</p><dl compact="compact">
+<dt>`<samp> ntsc</samp>'</dt>
+<dd><p>720x480
+</p></dd>
+<dt>`<samp> pal</samp>'</dt>
+<dd><p>720x576
+</p></dd>
+<dt>`<samp> qntsc</samp>'</dt>
+<dd><p>352x240
+</p></dd>
+<dt>`<samp> qpal</samp>'</dt>
+<dd><p>352x288
+</p></dd>
+<dt>`<samp> sntsc</samp>'</dt>
+<dd><p>640x480
+</p></dd>
+<dt>`<samp> spal</samp>'</dt>
+<dd><p>768x576
+</p></dd>
+<dt>`<samp> film</samp>'</dt>
+<dd><p>352x240
+</p></dd>
+<dt>`<samp> ntsc-film</samp>'</dt>
+<dd><p>352x240
+</p></dd>
+<dt>`<samp> sqcif</samp>'</dt>
+<dd><p>128x96
+</p></dd>
+<dt>`<samp> qcif</samp>'</dt>
+<dd><p>176x144
+</p></dd>
+<dt>`<samp> cif</samp>'</dt>
+<dd><p>352x288
+</p></dd>
+<dt>`<samp> 4cif</samp>'</dt>
+<dd><p>704x576
+</p></dd>
+<dt>`<samp> 16cif</samp>'</dt>
+<dd><p>1408x1152
+</p></dd>
+<dt>`<samp> qqvga</samp>'</dt>
+<dd><p>160x120
+</p></dd>
+<dt>`<samp> qvga</samp>'</dt>
+<dd><p>320x240
+</p></dd>
+<dt>`<samp> vga</samp>'</dt>
+<dd><p>640x480
+</p></dd>
+<dt>`<samp> svga</samp>'</dt>
+<dd><p>800x600
+</p></dd>
+<dt>`<samp> xga</samp>'</dt>
+<dd><p>1024x768
+</p></dd>
+<dt>`<samp> uxga</samp>'</dt>
+<dd><p>1600x1200
+</p></dd>
+<dt>`<samp> qxga</samp>'</dt>
+<dd><p>2048x1536
+</p></dd>
+<dt>`<samp> sxga</samp>'</dt>
+<dd><p>1280x1024
+</p></dd>
+<dt>`<samp> qsxga</samp>'</dt>
+<dd><p>2560x2048
+</p></dd>
+<dt>`<samp> hsxga</samp>'</dt>
+<dd><p>5120x4096
+</p></dd>
+<dt>`<samp> wvga</samp>'</dt>
+<dd><p>852x480
+</p></dd>
+<dt>`<samp> wxga</samp>'</dt>
+<dd><p>1366x768
+</p></dd>
+<dt>`<samp> wsxga</samp>'</dt>
+<dd><p>1600x1024
+</p></dd>
+<dt>`<samp> wuxga</samp>'</dt>
+<dd><p>1920x1200
+</p></dd>
+<dt>`<samp> woxga</samp>'</dt>
+<dd><p>2560x1600
+</p></dd>
+<dt>`<samp> wqsxga</samp>'</dt>
+<dd><p>3200x2048
+</p></dd>
+<dt>`<samp> wquxga</samp>'</dt>
+<dd><p>3840x2400
+</p></dd>
+<dt>`<samp> whsxga</samp>'</dt>
+<dd><p>6400x4096
+</p></dd>
+<dt>`<samp> whuxga</samp>'</dt>
+<dd><p>7680x4800
+</p></dd>
+<dt>`<samp> cga</samp>'</dt>
+<dd><p>320x200
+</p></dd>
+<dt>`<samp> ega</samp>'</dt>
+<dd><p>640x350
+</p></dd>
+<dt>`<samp> hd480</samp>'</dt>
+<dd><p>852x480
+</p></dd>
+<dt>`<samp> hd720</samp>'</dt>
+<dd><p>1280x720
+</p></dd>
+<dt>`<samp> hd1080</samp>'</dt>
+<dd><p>1920x1080
+</p></dd>
+<dt>`<samp> 2k</samp>'</dt>
+<dd><p>2048x1080
+</p></dd>
+<dt>`<samp> 2kflat</samp>'</dt>
+<dd><p>1998x1080
+</p></dd>
+<dt>`<samp> 2kscope</samp>'</dt>
+<dd><p>2048x858
+</p></dd>
+<dt>`<samp> 4k</samp>'</dt>
+<dd><p>4096x2160
+</p></dd>
+<dt>`<samp> 4kflat</samp>'</dt>
+<dd><p>3996x2160
+</p></dd>
+<dt>`<samp> 4kscope</samp>'</dt>
+<dd><p>4096x1716
+</p></dd>
+</dl>
+
+<p><a name="ANC5"></a>
+</p><a name="SEC8"></a>
+<h2 class="section"> <a href="#TOC8">2.5 Video rate</a> </h2>
+
+<p>Specify the frame rate of a video, expressed as the number of frames
+generated per second. It has to be a string in the format
+<var>frame_rate_num</var>/<var>frame_rate_den</var>, an integer number, a float
+number or a valid video frame rate abbreviation.
+
+</p><p>The following abbreviations are recognized:
+</p><dl compact="compact">
+<dt>`<samp> ntsc</samp>'</dt>
+<dd><p>30000/1001
+</p></dd>
+<dt>`<samp> pal</samp>'</dt>
+<dd><p>25/1
+</p></dd>
+<dt>`<samp> qntsc</samp>'</dt>
+<dd><p>30000/1001
+</p></dd>
+<dt>`<samp> qpal</samp>'</dt>
+<dd><p>25/1
+</p></dd>
+<dt>`<samp> sntsc</samp>'</dt>
+<dd><p>30000/1001
+</p></dd>
+<dt>`<samp> spal</samp>'</dt>
+<dd><p>25/1
+</p></dd>
+<dt>`<samp> film</samp>'</dt>
+<dd><p>24/1
+</p></dd>
+<dt>`<samp> ntsc-film</samp>'</dt>
+<dd><p>24000/1001
+</p></dd>
+</dl>
+
+<p><a name="ANC6"></a>
+</p><a name="SEC9"></a>
+<h2 class="section"> <a href="#TOC9">2.6 Ratio</a> </h2>
+
+<p>A ratio can be expressed as an expression, or in the form
+<var>numerator</var>:<var>denominator</var>.
+
+</p><p>Note that a ratio with infinite (1/0) or negative value is
+considered valid, so you should check on the returned value if you
+want to exclude those values.
+
+</p><p>The undefined value can be expressed using the &quot;0:0&quot; string.
+
+</p><p><a name="ANC7"></a>
+</p><a name="SEC10"></a>
+<h2 class="section"> <a href="#TOC10">2.7 Color</a> </h2>
+
+<p>It can be the name of a color (case insensitive match) or a
+[0x|#]RRGGBB[AA] sequence, possibly followed by &quot;@&quot; and a string
+representing the alpha component.
+
+</p><p>The alpha component may be a string composed by &quot;0x&quot; followed by an
+hexadecimal number or a decimal number between 0.0 and 1.0, which
+represents the opacity value (0x00/0.0 means completely transparent,
+0xff/1.0 completely opaque).
+If the alpha component is not specified then 0xff is assumed.
+
+</p><p>The string &quot;random&quot; will result in a random color.
+
+</p>
+<a name="SEC11"></a>
+<h1 class="chapter"> <a href="#TOC11">3. Expression Evaluation</a> </h1>
+
+<p>When evaluating an arithmetic expression, FFmpeg uses an internal
+formula evaluator, implemented through the `<tt>libavutil/eval.h</tt>'
+interface.
+
+</p><p>An expression may contain unary, binary operators, constants, and
+functions.
+
+</p><p>Two expressions <var>expr1</var> and <var>expr2</var> can be combined to form
+another expression &quot;<var>expr1</var>;<var>expr2</var>&quot;.
+<var>expr1</var> and <var>expr2</var> are evaluated in turn, and the new
+expression evaluates to the value of <var>expr2</var>.
+
+</p><p>The following binary operators are available: <code>+</code>, <code>-</code>,
+<code>*</code>, <code>/</code>, <code>^</code>.
+
+</p><p>The following unary operators are available: <code>+</code>, <code>-</code>.
+
+</p><p>The following functions are available:
+</p><dl compact="compact">
+<dt>`<samp> abs(x)</samp>'</dt>
+<dd><p>Compute absolute value of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> acos(x)</samp>'</dt>
+<dd><p>Compute arccosine of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> asin(x)</samp>'</dt>
+<dd><p>Compute arcsine of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> atan(x)</samp>'</dt>
+<dd><p>Compute arctangent of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> between(x, min, max)</samp>'</dt>
+<dd><p>Return 1 if <var>x</var> is greater than or equal to <var>min</var> and lesser than or
+equal to <var>max</var>, 0 otherwise.
+
+</p></dd>
+<dt>`<samp> bitand(x, y)</samp>'</dt>
+<dt>`<samp> bitor(x, y)</samp>'</dt>
+<dd><p>Compute bitwise and/or operation on <var>x</var> and <var>y</var>.
+
+</p><p>The results of the evaluation of <var>x</var> and <var>y</var> are converted to
+integers before executing the bitwise operation.
+
+</p><p>Note that both the conversion to integer and the conversion back to
+floating point can lose precision. Beware of unexpected results for
+large numbers (usually 2^53 and larger).
+
+</p></dd>
+<dt>`<samp> ceil(expr)</samp>'</dt>
+<dd><p>Round the value of expression <var>expr</var> upwards to the nearest
+integer. For example, &quot;ceil(1.5)&quot; is &quot;2.0&quot;.
+
+</p></dd>
+<dt>`<samp> cos(x)</samp>'</dt>
+<dd><p>Compute cosine of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> cosh(x)</samp>'</dt>
+<dd><p>Compute hyperbolic cosine of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> eq(x, y)</samp>'</dt>
+<dd><p>Return 1 if <var>x</var> and <var>y</var> are equivalent, 0 otherwise.
+
+</p></dd>
+<dt>`<samp> exp(x)</samp>'</dt>
+<dd><p>Compute exponential of <var>x</var> (with base <code>e</code>, the Euler's number).
+
+</p></dd>
+<dt>`<samp> floor(expr)</samp>'</dt>
+<dd><p>Round the value of expression <var>expr</var> downwards to the nearest
+integer. For example, &quot;floor(-1.5)&quot; is &quot;-2.0&quot;.
+
+</p></dd>
+<dt>`<samp> gauss(x)</samp>'</dt>
+<dd><p>Compute Gauss function of <var>x</var>, corresponding to
+<code>exp(-x*x/2) / sqrt(2*PI)</code>.
+
+</p></dd>
+<dt>`<samp> gcd(x, y)</samp>'</dt>
+<dd><p>Return the greatest common divisor of <var>x</var> and <var>y</var>. If both <var>x</var> and
+<var>y</var> are 0 or either or both are less than zero then behavior is undefined.
+
+</p></dd>
+<dt>`<samp> gt(x, y)</samp>'</dt>
+<dd><p>Return 1 if <var>x</var> is greater than <var>y</var>, 0 otherwise.
+
+</p></dd>
+<dt>`<samp> gte(x, y)</samp>'</dt>
+<dd><p>Return 1 if <var>x</var> is greater than or equal to <var>y</var>, 0 otherwise.
+
+</p></dd>
+<dt>`<samp> hypot(x, y)</samp>'</dt>
+<dd><p>This function is similar to the C function with the same name; it returns
+&quot;sqrt(<var>x</var>*<var>x</var> + <var>y</var>*<var>y</var>)&quot;, the length of the hypotenuse of a
+right triangle with sides of length <var>x</var> and <var>y</var>, or the distance of the
+point (<var>x</var>, <var>y</var>) from the origin.
+
+</p></dd>
+<dt>`<samp> if(x, y)</samp>'</dt>
+<dd><p>Evaluate <var>x</var>, and if the result is non-zero return the result of
+the evaluation of <var>y</var>, return 0 otherwise.
+
+</p></dd>
+<dt>`<samp> if(x, y, z)</samp>'</dt>
+<dd><p>Evaluate <var>x</var>, and if the result is non-zero return the evaluation
+result of <var>y</var>, otherwise the evaluation result of <var>z</var>.
+
+</p></dd>
+<dt>`<samp> ifnot(x, y)</samp>'</dt>
+<dd><p>Evaluate <var>x</var>, and if the result is zero return the result of the
+evaluation of <var>y</var>, return 0 otherwise.
+
+</p></dd>
+<dt>`<samp> ifnot(x, y, z)</samp>'</dt>
+<dd><p>Evaluate <var>x</var>, and if the result is zero return the evaluation
+result of <var>y</var>, otherwise the evaluation result of <var>z</var>.
+
+</p></dd>
+<dt>`<samp> isinf(x)</samp>'</dt>
+<dd><p>Return 1.0 if <var>x</var> is +/-INFINITY, 0.0 otherwise.
+
+</p></dd>
+<dt>`<samp> isnan(x)</samp>'</dt>
+<dd><p>Return 1.0 if <var>x</var> is NAN, 0.0 otherwise.
+
+</p></dd>
+<dt>`<samp> ld(var)</samp>'</dt>
+<dd><p>Allow to load the value of the internal variable with number
+<var>var</var>, which was previously stored with st(<var>var</var>, <var>expr</var>).
+The function returns the loaded value.
+
+</p></dd>
+<dt>`<samp> log(x)</samp>'</dt>
+<dd><p>Compute natural logarithm of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> lt(x, y)</samp>'</dt>
+<dd><p>Return 1 if <var>x</var> is lesser than <var>y</var>, 0 otherwise.
+
+</p></dd>
+<dt>`<samp> lte(x, y)</samp>'</dt>
+<dd><p>Return 1 if <var>x</var> is lesser than or equal to <var>y</var>, 0 otherwise.
+
+</p></dd>
+<dt>`<samp> max(x, y)</samp>'</dt>
+<dd><p>Return the maximum between <var>x</var> and <var>y</var>.
+
+</p></dd>
+<dt>`<samp> min(x, y)</samp>'</dt>
+<dd><p>Return the maximum between <var>x</var> and <var>y</var>.
+
+</p></dd>
+<dt>`<samp> mod(x, y)</samp>'</dt>
+<dd><p>Compute the remainder of division of <var>x</var> by <var>y</var>.
+
+</p></dd>
+<dt>`<samp> not(expr)</samp>'</dt>
+<dd><p>Return 1.0 if <var>expr</var> is zero, 0.0 otherwise.
+
+</p></dd>
+<dt>`<samp> pow(x, y)</samp>'</dt>
+<dd><p>Compute the power of <var>x</var> elevated <var>y</var>, it is equivalent to
+&quot;(<var>x</var>)^(<var>y</var>)&quot;.
+
+</p></dd>
+<dt>`<samp> print(t)</samp>'</dt>
+<dt>`<samp> print(t, l)</samp>'</dt>
+<dd><p>Print the value of expression <var>t</var> with loglevel <var>l</var>. If
+<var>l</var> is not specified then a default log level is used.
+Returns the value of the expression printed.
+
+</p><p>Prints t with loglevel l
+
+</p></dd>
+<dt>`<samp> random(x)</samp>'</dt>
+<dd><p>Return a pseudo random value between 0.0 and 1.0. <var>x</var> is the index of the
+internal variable which will be used to save the seed/state.
+
+</p></dd>
+<dt>`<samp> root(expr, max)</samp>'</dt>
+<dd><p>Find an input value for which the function represented by <var>expr</var>
+with argument <var>ld(0)</var> is 0 in the interval 0..<var>max</var>.
+
+</p><p>The expression in <var>expr</var> must denote a continuous function or the
+result is undefined.
+
+</p><p><var>ld(0)</var> is used to represent the function input value, which means
+that the given expression will be evaluated multiple times with
+various input values that the expression can access through
+<code>ld(0)</code>. When the expression evaluates to 0 then the
+corresponding input value will be returned.
+
+</p></dd>
+<dt>`<samp> sin(x)</samp>'</dt>
+<dd><p>Compute sine of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> sinh(x)</samp>'</dt>
+<dd><p>Compute hyperbolic sine of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> sqrt(expr)</samp>'</dt>
+<dd><p>Compute the square root of <var>expr</var>. This is equivalent to
+&quot;(<var>expr</var>)^.5&quot;.
+
+</p></dd>
+<dt>`<samp> squish(x)</samp>'</dt>
+<dd><p>Compute expression <code>1/(1 + exp(4*x))</code>.
+
+</p></dd>
+<dt>`<samp> st(var, expr)</samp>'</dt>
+<dd><p>Allow to store the value of the expression <var>expr</var> in an internal
+variable. <var>var</var> specifies the number of the variable where to
+store the value, and it is a value ranging from 0 to 9. The function
+returns the value stored in the internal variable.
+Note, Variables are currently not shared between expressions.
+
+</p></dd>
+<dt>`<samp> tan(x)</samp>'</dt>
+<dd><p>Compute tangent of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> tanh(x)</samp>'</dt>
+<dd><p>Compute hyperbolic tangent of <var>x</var>.
+
+</p></dd>
+<dt>`<samp> taylor(expr, x)</samp>'</dt>
+<dt>`<samp> taylor(expr, x, id)</samp>'</dt>
+<dd><p>Evaluate a Taylor series at <var>x</var>, given an expression representing
+the <code>ld(id)</code>-th derivative of a function at 0.
+
+</p><p>When the series does not converge the result is undefined.
+
+</p><p><var>ld(id)</var> is used to represent the derivative order in <var>expr</var>,
+which means that the given expression will be evaluated multiple times
+with various input values that the expression can access through
+<code>ld(id)</code>. If <var>id</var> is not specified then 0 is assumed.
+
+</p><p>Note, when you have the derivatives at y instead of 0,
+<code>taylor(expr, x-y)</code> can be used.
+
+</p></dd>
+<dt>`<samp> time(0)</samp>'</dt>
+<dd><p>Return the current (wallclock) time in seconds.
+
+</p></dd>
+<dt>`<samp> trunc(expr)</samp>'</dt>
+<dd><p>Round the value of expression <var>expr</var> towards zero to the nearest
+integer. For example, &quot;trunc(-1.5)&quot; is &quot;-1.0&quot;.
+
+</p></dd>
+<dt>`<samp> while(cond, expr)</samp>'</dt>
+<dd><p>Evaluate expression <var>expr</var> while the expression <var>cond</var> is
+non-zero, and returns the value of the last <var>expr</var> evaluation, or
+NAN if <var>cond</var> was always false.
+</p></dd>
+</dl>
+
+<p>The following constants are available:
+</p><dl compact="compact">
+<dt>`<samp> PI</samp>'</dt>
+<dd><p>area of the unit disc, approximately 3.14
+</p></dd>
+<dt>`<samp> E</samp>'</dt>
+<dd><p>exp(1) (Euler's number), approximately 2.718
+</p></dd>
+<dt>`<samp> PHI</samp>'</dt>
+<dd><p>golden ratio (1+sqrt(5))/2, approximately 1.618
+</p></dd>
+</dl>
+
+<p>Assuming that an expression is considered &quot;true&quot; if it has a non-zero
+value, note that:
+
+</p><p><code>*</code> works like AND
+
+</p><p><code>+</code> works like OR
+
+</p><p>For example the construct:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">if (A AND B) then C
+</pre></td></tr></table><p>is equivalent to:
+</p><table><tr><td>&nbsp;</td><td><pre class="example">if(A*B, C)
+</pre></td></tr></table>
+<p>In your C code, you can extend the list of unary and binary functions,
+and define recognized constants, so that they are available for your
+expressions.
+
+</p><p>The evaluator also recognizes the International System unit prefixes.
+If 'i' is appended after the prefix, binary prefixes are used, which
+are based on powers of 1024 instead of powers of 1000.
+The 'B' postfix multiplies the value by 8, and can be appended after a
+unit prefix or used alone. This allows using for example 'KB', 'MiB',
+'G' and 'B' as number postfix.
+
+</p><p>The list of available International System prefixes follows, with
+indication of the corresponding powers of 10 and of 2.
+</p><dl compact="compact">
+<dt>`<samp> y</samp>'</dt>
+<dd><p>10^-24 / 2^-80
+</p></dd>
+<dt>`<samp> z</samp>'</dt>
+<dd><p>10^-21 / 2^-70
+</p></dd>
+<dt>`<samp> a</samp>'</dt>
+<dd><p>10^-18 / 2^-60
+</p></dd>
+<dt>`<samp> f</samp>'</dt>
+<dd><p>10^-15 / 2^-50
+</p></dd>
+<dt>`<samp> p</samp>'</dt>
+<dd><p>10^-12 / 2^-40
+</p></dd>
+<dt>`<samp> n</samp>'</dt>
+<dd><p>10^-9 / 2^-30
+</p></dd>
+<dt>`<samp> u</samp>'</dt>
+<dd><p>10^-6 / 2^-20
+</p></dd>
+<dt>`<samp> m</samp>'</dt>
+<dd><p>10^-3 / 2^-10
+</p></dd>
+<dt>`<samp> c</samp>'</dt>
+<dd><p>10^-2
+</p></dd>
+<dt>`<samp> d</samp>'</dt>
+<dd><p>10^-1
+</p></dd>
+<dt>`<samp> h</samp>'</dt>
+<dd><p>10^2
+</p></dd>
+<dt>`<samp> k</samp>'</dt>
+<dd><p>10^3 / 2^10
+</p></dd>
+<dt>`<samp> K</samp>'</dt>
+<dd><p>10^3 / 2^10
+</p></dd>
+<dt>`<samp> M</samp>'</dt>
+<dd><p>10^6 / 2^20
+</p></dd>
+<dt>`<samp> G</samp>'</dt>
+<dd><p>10^9 / 2^30
+</p></dd>
+<dt>`<samp> T</samp>'</dt>
+<dd><p>10^12 / 2^40
+</p></dd>
+<dt>`<samp> P</samp>'</dt>
+<dd><p>10^15 / 2^40
+</p></dd>
+<dt>`<samp> E</samp>'</dt>
+<dd><p>10^18 / 2^50
+</p></dd>
+<dt>`<samp> Z</samp>'</dt>
+<dd><p>10^21 / 2^60
+</p></dd>
+<dt>`<samp> Y</samp>'</dt>
+<dd><p>10^24 / 2^70
+</p></dd>
+</dl>
+
+
+<a name="SEC12"></a>
+<h1 class="chapter"> <a href="#TOC12">4. See Also</a> </h1>
+
+<p><a href="ffmpeg.html,ffmpeg">ffmpeg.html,ffmpeg</a>, <a href="ffplay.html,ffplay">ffplay.html,ffplay</a>, <a href="ffprobe.html,ffprobe">ffprobe.html,ffprobe</a>, <a href="ffserver.html,ffserver">ffserver.html,ffserver</a>,
+<a href="libavutil.html,libavutil">libavutil.html,libavutil</a>
+
+</p>
+
+<a name="SEC13"></a>
+<h1 class="chapter"> <a href="#TOC13">5. Authors</a> </h1>
+
+<p>The FFmpeg developers.
+
+</p><p>For details about the authorship, see the Git history of the project
+(git://source.ffmpeg.org/ffmpeg), e.g. by typing the command
+<code>git log</code> in the FFmpeg source directory, or browsing the
+online repository at <a href="http://source.ffmpeg.org">http://source.ffmpeg.org</a>.
+
+</p><p>Maintainers for the specific components are listed in the file
+`<tt>MAINTAINERS</tt>' in the source code tree.
+
+</p>
+<a name="SEC_Contents"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC_Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h1>Table of Contents</h1>
+<div class="contents">
+
+<ul class="toc">
+  <li><a name="TOC1" href="#SEC1">1. Description</a></li>
+  <li><a name="TOC2" href="#SEC2">2. Syntax</a>
+  <ul class="toc">
+    <li><a name="TOC3" href="#SEC3">2.1 Quoting and escaping</a>
+    <ul class="toc">
+      <li><a name="TOC4" href="#SEC4">2.1.1 Examples</a></li>
+    </ul></li>
+    <li><a name="TOC5" href="#SEC5">2.2 Date</a></li>
+    <li><a name="TOC6" href="#SEC6">2.3 Time duration</a></li>
+    <li><a name="TOC7" href="#SEC7">2.4 Video size</a></li>
+    <li><a name="TOC8" href="#SEC8">2.5 Video rate</a></li>
+    <li><a name="TOC9" href="#SEC9">2.6 Ratio</a></li>
+    <li><a name="TOC10" href="#SEC10">2.7 Color</a></li>
+  </ul></li>
+  <li><a name="TOC11" href="#SEC11">3. Expression Evaluation</a></li>
+  <li><a name="TOC12" href="#SEC12">4. See Also</a></li>
+  <li><a name="TOC13" href="#SEC13">5. Authors</a></li>
+</ul>
+</div>
+
+<a name="SEC_About"></a>
+<table cellpadding="1" cellspacing="1" border="0">
+<tr><td valign="middle" align="left">[<a href="#SEC_Top" title="Cover (top) of document">Top</a>]</td>
+<td valign="middle" align="left">[<a href="#SEC_Contents" title="Table of contents">Contents</a>]</td>
+<td valign="middle" align="left">[Index]</td>
+<td valign="middle" align="left">[<a href="#SEC_About" title="About (help)"> ? </a>]</td>
+</tr></table>
+<h1>About This Document</h1>
+<p>
+  This document was generated by <em>Robin Aldenhoven</em> on <em>April, 3 2013</em> using <a href="http://texi2html.cvshome.org/"><em>texi2html 1.70</em></a>.
+</p>
+<p>
+  The buttons in the navigation panels have the following meaning:
+</p>
+<table border="1">
+  <tr>
+    <th> Button </th>
+    <th> Name </th>
+    <th> Go to </th>
+    <th> From 1.2.3 go to</th>
+  </tr>
+  <tr>
+    <td align="center"> [ &lt; ] </td>
+    <td align="center">Back</td>
+    <td>previous section in reading order</td>
+    <td>1.2.2</td>
+  </tr>
+  <tr>
+    <td align="center"> [ &gt; ] </td>
+    <td align="center">Forward</td>
+    <td>next section in reading order</td>
+    <td>1.2.4</td>
+  </tr>
+  <tr>
+    <td align="center"> [ &lt;&lt; ] </td>
+    <td align="center">FastBack</td>
+    <td>beginning of this chapter or previous chapter</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td align="center"> [ Up ] </td>
+    <td align="center">Up</td>
+    <td>up section</td>
+    <td>1.2</td>
+  </tr>
+  <tr>
+    <td align="center"> [ &gt;&gt; ] </td>
+    <td align="center">FastForward</td>
+    <td>next chapter</td>
+    <td>2</td>
+  </tr>
+  <tr>
+    <td align="center"> [Top] </td>
+    <td align="center">Top</td>
+    <td>cover (top) of document</td>
+    <td> &nbsp; </td>
+  </tr>
+  <tr>
+    <td align="center"> [Contents] </td>
+    <td align="center">Contents</td>
+    <td>table of contents</td>
+    <td> &nbsp; </td>
+  </tr>
+  <tr>
+    <td align="center"> [Index] </td>
+    <td align="center">Index</td>
+    <td>index</td>
+    <td> &nbsp; </td>
+  </tr>
+  <tr>
+    <td align="center"> [ ? ] </td>
+    <td align="center">About</td>
+    <td>about (help)</td>
+    <td> &nbsp; </td>
+  </tr>
+</table>
+
+<p>
+  where the <strong> Example </strong> assumes that the current position is at <strong> Subsubsection One-Two-Three </strong> of a document of the following structure:
+</p>
+
+<ul>
+  <li> 1. Section One
+    <ul>
+      <li>1.1 Subsection One-One
+        <ul>
+          <li>...</li>
+        </ul>
+      </li>
+      <li>1.2 Subsection One-Two
+        <ul>
+          <li>1.2.1 Subsubsection One-Two-One</li>
+          <li>1.2.2 Subsubsection One-Two-Two</li>
+          <li>1.2.3 Subsubsection One-Two-Three &nbsp; &nbsp;
+            <strong>&lt;== Current Position </strong></li>
+          <li>1.2.4 Subsubsection One-Two-Four</li>
+        </ul>
+      </li>
+      <li>1.3 Subsection One-Three
+        <ul>
+          <li>...</li>
+        </ul>
+      </li>
+      <li>1.4 Subsection One-Four</li>
+    </ul>
+  </li>
+</ul>
+
+
+<footer class="footer pagination-right">
+<span class="label label-info">This document was generated by <em>Robin Aldenhoven</em> on <em>April, 3 2013</em> using <a href="http://texi2html.cvshome.org/"><em>texi2html 1.70</em></a>.</span></footer></div>

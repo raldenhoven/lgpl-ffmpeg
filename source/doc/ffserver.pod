@@ -1,0 +1,763 @@
+=head1 NAME
+
+ffserver - ffserver video server
+
+=head1 SYNOPSIS
+
+
+ffserver [I<options>]
+
+
+=head1 DESCRIPTION
+
+
+B<ffserver> is a streaming server for both audio and video. It
+supports several live feeds, streaming from files and time shifting on
+live feeds (you can seek to positions in the past on each live feed,
+provided you specify a big enough feed storage in
+F<ffserver.conf>).
+
+B<ffserver> receives prerecorded files or FFM streams from some
+B<ffmpeg> instance as input, then streams them over
+RTP/RTSP/HTTP.
+
+An B<ffserver> instance will listen on some port as specified
+in the configuration file. You can launch one or more instances of
+B<ffmpeg> and send one or more FFM streams to the port where
+ffserver is expecting to receive them. Alternately, you can make
+B<ffserver> launch such B<ffmpeg> instances at startup.
+
+Input streams are called feeds, and each one is specified by a
+C<E<lt>FeedE<gt>> section in the configuration file.
+
+For each feed you can have different output streams in various
+formats, each one specified by a C<E<lt>StreamE<gt>> section in the
+configuration file.
+
+
+=head2 Status stream
+
+
+ffserver supports an HTTP interface which exposes the current status
+of the server.
+
+Simply point your browser to the address of the special status stream
+specified in the configuration file.
+
+For example if you have:
+	
+	<Stream status.html>
+	Format status
+	
+	# Only allow local people to get the status
+	ACL allow localhost
+	ACL allow 192.168.0.0 192.168.255.255
+	</Stream>
+
+
+then the server will post a page with the status information when
+the special stream F<status.html> is requested.
+
+
+=head2 What can this do?
+
+
+When properly configured and running, you can capture video and audio in real
+time from a suitable capture card, and stream it out over the Internet to
+either Windows Media Player or RealAudio player (with some restrictions).
+
+It can also stream from files, though that is currently broken. Very often, a
+web server can be used to serve up the files just as well.
+
+It can stream prerecorded video from .ffm files, though it is somewhat tricky
+to make it work correctly.
+
+
+=head2 How do I make it work?
+
+
+First, build the kit. It *really* helps to have installed LAME first. Then when
+you run the ffserver ./configure, make sure that you have the
+C<--enable-libmp3lame> flag turned on.
+
+LAME is important as it allows for streaming audio to Windows Media Player.
+Don't ask why the other audio types do not work.
+
+As a simple test, just run the following two command lines where INPUTFILE
+is some file which you can decode with ffmpeg:
+
+	
+	ffserver -f doc/ffserver.conf &
+	ffmpeg -i INPUTFILE http://localhost:8090/feed1.ffm
+
+
+At this point you should be able to go to your Windows machine and fire up
+Windows Media Player (WMP). Go to Open URL and enter
+
+	
+	    http://<linuxbox>:8090/test.asf
+
+
+You should (after a short delay) see video and hear audio.
+
+WARNING: trying to stream test1.mpg doesn't work with WMP as it tries to
+transfer the entire file before starting to play.
+The same is true of AVI files.
+
+
+=head2 What happens next?
+
+
+You should edit the ffserver.conf file to suit your needs (in terms of
+frame rates etc). Then install ffserver and ffmpeg, write a script to start
+them up, and off you go.
+
+
+=head2 Troubleshooting
+
+
+
+=head3 I don't hear any audio, but video is fine.
+
+
+Maybe you didn't install LAME, or got your ./configure statement wrong. Check
+the ffmpeg output to see if a line referring to MP3 is present. If not, then
+your configuration was incorrect. If it is, then maybe your wiring is not
+set up correctly. Maybe the sound card is not getting data from the right
+input source. Maybe you have a really awful audio interface (like I do)
+that only captures in stereo and also requires that one channel be flipped.
+If you are one of these people, then export 'AUDIO_FLIP_LEFT=1' before
+starting ffmpeg.
+
+
+=head3 The audio and video lose sync after a while.
+
+
+Yes, they do.
+
+
+=head3 After a long while, the video update rate goes way down in WMP.
+
+
+Yes, it does. Who knows why?
+
+
+=head3 WMP 6.4 behaves differently to WMP 7.
+
+
+Yes, it does. Any thoughts on this would be gratefully received. These
+differences extend to embedding WMP into a web page. [There are two
+object IDs that you can use: The old one, which does not play well, and
+the new one, which does (both tested on the same system). However,
+I suspect that the new one is not available unless you have installed WMP 7].
+
+
+=head2 What else can it do?
+
+
+You can replay video from .ffm files that was recorded earlier.
+However, there are a number of caveats, including the fact that the
+ffserver parameters must match the original parameters used to record the
+file. If they do not, then ffserver deletes the file before recording into it.
+(Now that I write this, it seems broken).
+
+You can fiddle with many of the codec choices and encoding parameters, and
+there are a bunch more parameters that you cannot control. Post a message
+to the mailing list if there are some 'must have' parameters. Look in
+ffserver.conf for a list of the currently available controls.
+
+It will automatically generate the ASX or RAM files that are often used
+in browsers. These files are actually redirections to the underlying ASF
+or RM file. The reason for this is that the browser often fetches the
+entire file before starting up the external viewer. The redirection files
+are very small and can be transferred quickly. [The stream itself is
+often 'infinite' and thus the browser tries to download it and never
+finishes.]
+
+
+=head2 Tips
+
+
+* When you connect to a live stream, most players (WMP, RA, etc) want to
+buffer a certain number of seconds of material so that they can display the
+signal continuously. However, ffserver (by default) starts sending data
+in realtime. This means that there is a pause of a few seconds while the
+buffering is being done by the player. The good news is that this can be
+cured by adding a '?buffer=5' to the end of the URL. This means that the
+stream should start 5 seconds in the past -- and so the first 5 seconds
+of the stream are sent as fast as the network will allow. It will then
+slow down to real time. This noticeably improves the startup experience.
+
+You can also add a 'Preroll 15' statement into the ffserver.conf that will
+add the 15 second prebuffering on all requests that do not otherwise
+specify a time. In addition, ffserver will skip frames until a key_frame
+is found. This further reduces the startup delay by not transferring data
+that will be discarded.
+
+* You may want to adjust the MaxBandwidth in the ffserver.conf to limit
+the amount of bandwidth consumed by live streams.
+
+
+=head2 Why does the ?buffer / Preroll stop working after a time?
+
+
+It turns out that (on my machine at least) the number of frames successfully
+grabbed is marginally less than the number that ought to be grabbed. This
+means that the timestamp in the encoded data stream gets behind realtime.
+This means that if you say 'Preroll 10', then when the stream gets 10
+or more seconds behind, there is no Preroll left.
+
+Fixing this requires a change in the internals of how timestamps are
+handled.
+
+
+=head2 Does the C<?date=> stuff work.
+
+
+Yes (subject to the limitation outlined above). Also note that whenever you
+start ffserver, it deletes the ffm file (if any parameters have changed),
+thus wiping out what you had recorded before.
+
+The format of the C<?date=xxxxxx> is fairly flexible. You should use one
+of the following formats (the 'T' is literal):
+
+	
+	* YYYY-MM-DDTHH:MM:SS     (localtime)
+	* YYYY-MM-DDTHH:MM:SSZ    (UTC)
+
+
+You can omit the YYYY-MM-DD, and then it refers to the current day. However
+note that B<?date=16:00:00> refers to 16:00 on the current day -- this
+may be in the future and so is unlikely to be useful.
+
+You use this by adding the ?date= to the end of the URL for the stream.
+For example:   B<http://localhost:8080/test.asf?date=2002-07-26T23:05:00>.
+
+
+=head2 What is FFM, FFM2
+
+
+FFM and FFM2 are formats used by ffserver. They allow storing a wide variety of
+video and audio streams and encoding options, and can store a moving time segment
+of an infinite movie or a whole movie.
+
+FFM is version specific, and there is limited compatibility of FFM files
+generated by one version of ffmpeg/ffserver and another version of
+ffmpeg/ffserver. It may work but it is not guaranteed to work.
+
+FFM2 is extensible while maintaining compatibility and should work between
+differing versions of tools. FFM2 is the default.
+
+
+=head1 OPTIONS
+
+
+All the numerical options, if not specified otherwise, accept a string
+representing a number as input, which may be followed by one of the SI
+unit prefixes, for example: 'K', 'M', or 'G'.
+
+If 'i' is appended to the SI unit prefix, the complete prefix will be
+interpreted as a unit prefix for binary multiplies, which are based on
+powers of 1024 instead of powers of 1000. Appending 'B' to the SI unit
+prefix multiplies the value by 8. This allows using, for example:
+'KB', 'MiB', 'G' and 'B' as number suffixes.
+
+Options which do not take arguments are boolean options, and set the
+corresponding value to true. They can be set to false by prefixing
+the option name with "no". For example using "-nofoo"
+will set the boolean option with name "foo" to false.
+
+
+
+=head2 Stream specifiers
+
+Some options are applied per-stream, e.g. bitrate or codec. Stream specifiers
+are used to precisely specify which stream(s) a given option belongs to.
+
+A stream specifier is a string generally appended to the option name and
+separated from it by a colon. E.g. C<-codec:a:1 ac3> contains the
+C<a:1> stream specifier, which matches the second audio stream. Therefore, it
+would select the ac3 codec for the second audio stream.
+
+A stream specifier can match several streams, so that the option is applied to all
+of them. E.g. the stream specifier in C<-b:a 128k> matches all audio
+streams.
+
+An empty stream specifier matches all streams. For example, C<-codec copy>
+or C<-codec: copy> would copy all the streams without reencoding.
+
+Possible forms of stream specifiers are:
+
+=over 4
+
+
+=item I<stream_index>
+
+Matches the stream with this index. E.g. C<-threads:1 4> would set the
+thread count for the second stream to 4.
+
+=item I<stream_type>B<[:>I<stream_index>B<]>
+
+I<stream_type> is one of following: 'v' for video, 'a' for audio, 's' for subtitle,
+'d' for data, and 't' for attachments. If I<stream_index> is given, then it matches
+stream number I<stream_index> of this type. Otherwise, it matches all
+streams of this type.
+
+=item B<p:>I<program_id>B<[:>I<stream_index>B<]>
+
+If I<stream_index> is given, then it matches the stream with number I<stream_index>
+in the program with the id I<program_id>. Otherwise, it matches all streams in the
+program.
+
+=item B<#>I<stream_id>
+
+Matches the stream by a format-specific ID.
+
+=back
+
+
+
+=head2 Generic options
+
+
+These options are shared amongst the ff* tools.
+
+
+=over 4
+
+
+
+=item B<-L>
+
+Show license.
+
+
+=item B<-h, -?, -help, --help [>I<arg>B<]>
+
+Show help. An optional parameter may be specified to print help about a specific
+item.
+
+Possible values of I<arg> are:
+
+=over 4
+
+
+=item B<decoder=>I<decoder_name>
+
+Print detailed information about the decoder named I<decoder_name>. Use the
+B<-decoders> option to get a list of all decoders.
+
+
+=item B<encoder=>I<encoder_name>
+
+Print detailed information about the encoder named I<encoder_name>. Use the
+B<-encoders> option to get a list of all encoders.
+
+
+=item B<demuxer=>I<demuxer_name>
+
+Print detailed information about the demuxer named I<demuxer_name>. Use the
+B<-formats> option to get a list of all demuxers and muxers.
+
+
+=item B<muxer=>I<muxer_name>
+
+Print detailed information about the muxer named I<muxer_name>. Use the
+B<-formats> option to get a list of all muxers and demuxers.
+
+
+=back
+
+
+
+=item B<-version>
+
+Show version.
+
+
+=item B<-formats>
+
+Show available formats.
+
+
+=item B<-codecs>
+
+Show all codecs known to libavcodec.
+
+Note that the term 'codec' is used throughout this documentation as a shortcut
+for what is more correctly called a media bitstream format.
+
+
+=item B<-decoders>
+
+Show available decoders.
+
+
+=item B<-encoders>
+
+Show all available encoders.
+
+
+=item B<-bsfs>
+
+Show available bitstream filters.
+
+
+=item B<-protocols>
+
+Show available protocols.
+
+
+=item B<-filters>
+
+Show available libavfilter filters.
+
+
+=item B<-pix_fmts>
+
+Show available pixel formats.
+
+
+=item B<-sample_fmts>
+
+Show available sample formats.
+
+
+=item B<-layouts>
+
+Show channel names and standard channel layouts.
+
+
+=item B<-loglevel> I<loglevel> B<| -v> I<loglevel>
+
+Set the logging level used by the library.
+I<loglevel> is a number or a string containing one of the following values:
+
+=over 4
+
+
+=item B<quiet>
+
+Show nothing at all; be silent.
+
+=item B<panic>
+
+Only show fatal errors which could lead the process to crash, such as
+and assert failure. This is not currently used for anything.
+
+=item B<fatal>
+
+Only show fatal errors. These are errors after which the process absolutely
+cannot continue after.
+
+=item B<error>
+
+Show all errors, including ones which can be recovered from.
+
+=item B<warning>
+
+Show all warnings and errors. Any message related to possibly
+incorrect or unexpected events will be shown.
+
+=item B<info>
+
+Show informative messages during processing. This is in addition to
+warnings and errors. This is the default value.
+
+=item B<verbose>
+
+Same as C<info>, except more verbose.
+
+=item B<debug>
+
+Show everything, including debugging information.
+
+=back
+
+
+By default the program logs to stderr, if coloring is supported by the
+terminal, colors are used to mark errors and warnings. Log coloring
+can be disabled setting the environment variable
+B<AV_LOG_FORCE_NOCOLOR> or B<NO_COLOR>, or can be forced setting
+the environment variable B<AV_LOG_FORCE_COLOR>.
+The use of the environment variable B<NO_COLOR> is deprecated and
+will be dropped in a following FFmpeg version.
+
+
+=item B<-report>
+
+Dump full command line and console output to a file named
+C<I<program>-I<YYYYMMDD>-I<HHMMSS>.log> in the current
+directory.
+This file can be useful for bug reports.
+It also implies C<-loglevel verbose>.
+
+Setting the environment variable C<FFREPORT> to any value has the
+same effect. If the value is a ':'-separated key=value sequence, these
+options will affect the report; options values must be escaped if they
+contain special characters or the options delimiter ':' (see the
+``Quoting and escaping'' section in the ffmpeg-utils manual). The
+following option is recognized:
+
+=over 4
+
+
+=item B<file>
+
+set the file name to use for the report; C<%p> is expanded to the name
+of the program, C<%t> is expanded to a timestamp, C<%%> is expanded
+to a plain C<%>
+
+=back
+
+
+Errors in parsing the environment variable are not fatal, and will not
+appear in the report.
+
+
+=item B<-cpuflags flags (>I<global>B<)>
+
+Allows setting and clearing cpu flags. This option is intended
+for testing. Do not use it unless you know what you're doing.
+	
+	ffmpeg -cpuflags -sse+mmx ...
+	ffmpeg -cpuflags mmx ...
+	ffmpeg -cpuflags 0 ...
+
+Possible flags for this option are:
+
+=over 4
+
+
+=item B<x86>
+
+
+=over 4
+
+
+=item B<mmx>
+
+
+=item B<mmxext>
+
+
+=item B<sse>
+
+
+=item B<sse2>
+
+
+=item B<sse2slow>
+
+
+=item B<sse3>
+
+
+=item B<sse3slow>
+
+
+=item B<ssse3>
+
+
+=item B<atom>
+
+
+=item B<sse4.1>
+
+
+=item B<sse4.2>
+
+
+=item B<avx>
+
+
+=item B<xop>
+
+
+=item B<fma4>
+
+
+=item B<3dnow>
+
+
+=item B<3dnowext>
+
+
+=item B<cmov>
+
+
+=back
+
+
+=item B<ARM>
+
+
+=over 4
+
+
+=item B<armv5te>
+
+
+=item B<armv6>
+
+
+=item B<armv6t2>
+
+
+=item B<vfp>
+
+
+=item B<vfpv3>
+
+
+=item B<neon>
+
+
+=back
+
+
+=item B<PowerPC>
+
+
+=over 4
+
+
+=item B<altivec>
+
+
+=back
+
+
+=item B<Specific Processors>
+
+
+=over 4
+
+
+=item B<pentium2>
+
+
+=item B<pentium3>
+
+
+=item B<pentium4>
+
+
+=item B<k6>
+
+
+=item B<k62>
+
+
+=item B<athlon>
+
+
+=item B<athlonxp>
+
+
+=item B<k8>
+
+
+=back
+
+
+=back
+
+
+
+=back
+
+
+
+=head2 AVOptions
+
+
+These options are provided directly by the libavformat, libavdevice and
+libavcodec libraries. To see the list of available AVOptions, use the
+B<-help> option. They are separated into two categories:
+
+=over 4
+
+
+=item B<generic>
+
+These options can be set for any container, codec or device. Generic options
+are listed under AVFormatContext options for containers/devices and under
+AVCodecContext options for codecs.
+
+=item B<private>
+
+These options are specific to the given container, device or codec. Private
+options are listed under their corresponding containers/devices/codecs.
+
+=back
+
+
+For example to write an ID3v2.3 header instead of a default ID3v2.4 to
+an MP3 file, use the B<id3v2_version> private option of the MP3
+muxer:
+	
+	ffmpeg -i input.flac -id3v2_version 3 out.mp3
+
+
+All codec AVOptions are obviously per-stream, so the chapter on stream
+specifiers applies to them
+
+Note B<-nooption> syntax cannot be used for boolean AVOptions,
+use B<-option 0>/B<-option 1>.
+
+Note2 old undocumented way of specifying per-stream AVOptions by prepending
+v/a/s to the options name is now obsolete and will be removed soon.
+
+
+=head2 Main options
+
+
+
+=over 4
+
+
+=item B<-f> I<configfile>
+
+Use F<configfile> instead of F</etc/ffserver.conf>.
+
+=item B<-n>
+
+Enable no-launch mode. This option disables all the Launch directives
+within the various E<lt>StreamE<gt> sections. Since ffserver will not launch
+any ffmpeg instances, you will have to launch them manually.
+
+=item B<-d>
+
+Enable debug mode. This option increases log verbosity, directs log
+messages to stdout.
+
+=back
+
+
+
+=head1 SEE ALSO
+
+
+
+The F<doc/ffserver.conf> example, ffmpeg(1), ffplay(1), ffprobe(1),
+ffmpeg-utils(1), ffmpeg-scaler(1), ffmpeg-resampler(1),
+ffmpeg-codecs(1), ffmpeg-bitstream-filters(1), ffmpeg-formats(1),
+ffmpeg-devices(1), ffmpeg-protocols(1), ffmpeg-filters(1)
+
+
+=head1 AUTHORS
+
+
+The FFmpeg developers.
+
+For details about the authorship, see the Git history of the project
+(git://source.ffmpeg.org/ffmpeg), e.g. by typing the command
+B<git log> in the FFmpeg source directory, or browsing the
+online repository at E<lt>B<http://source.ffmpeg.org>E<gt>.
+
+Maintainers for the specific components are listed in the file
+F<MAINTAINERS> in the source code tree.
+
+
+
